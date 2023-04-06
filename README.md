@@ -2,7 +2,7 @@
 
 unzip the chr22.in.gz file
 ```console
-gzip -dk file.gz
+gzip -dk chr22.in.gz
 ```
 
 compile using `make`
