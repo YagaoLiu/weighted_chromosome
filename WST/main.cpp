@@ -35,11 +35,15 @@ int main (int argc, char ** argv ) {
 	istream& text = st.text.is_open()?st.text:cin;
     string& pfile_prefix = st.patterns;
     ostream& output = st.output.is_open()?st.output:cout;
-    	
+
+	auto begin = get_time::now();
 	WeightedSequence W;
     text >> W;
 
     W.build_index(st.z, st.quiet, output);
+	auto end = get_time::now();
+	auto diff = end - begin;
+	output << "Construct time:" << chrono::duration_cast<chrono::milliseconds>(diff).count() << endl;
 	
 	cout << "Start patterm matching" << endl;
 #if 1
@@ -50,13 +54,13 @@ int main (int argc, char ** argv ) {
 		boost::iostreams::filtering_istream patterns;
 		patterns.push(boost::iostreams::gzip_decompressor());
 		patterns.push(file);		
-		auto begin = get_time::now();
+		auto begin1 = get_time::now();
 		for (string str; getline(patterns, str); ){
 			vector<int> occs = W.occurrences(str);
 		}
-		auto end = get_time::now();
-		auto diff = end - begin;
-		output << pfile << " total search:" << chrono::duration_cast<chrono::milliseconds>(diff).count() << endl;
+		auto end1 = get_time::now();
+		auto diff1 = end1 - begin1;
+		output << pfile << " total search:" << chrono::duration_cast<chrono::milliseconds>(diff1).count() << endl;
 	}
 #endif
 
