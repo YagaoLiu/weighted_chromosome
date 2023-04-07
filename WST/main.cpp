@@ -20,6 +20,7 @@
 #include <cstring>
 #include <chrono>
 #include <ctime>
+#include <malloc.h>
 
 #include "input.h"
 #include "weighted_sequence.h"
@@ -37,16 +38,25 @@ int main (int argc, char ** argv ) {
     ostream& output = st.output.is_open()?st.output:cout;
 
 	auto begin = get_time::now();
+	struct mallinfo2 mi;
+    mi = mallinfo2();
+	double begin_ram = mi.hblkhd + mi.uordblks;
+
 	WeightedSequence W;
     text >> W;
-
     W.build_index(st.z, st.quiet, output);
+		
+	mi = mallinfo2();
+	double end_ram = mi.hblkhd + mi.uordblks;
+
+	
 	auto end = get_time::now();
 	auto diff = end - begin;
-	output << "Construct time:" << chrono::duration_cast<chrono::milliseconds>(diff).count() << endl;
-	
+	output << "Construct time:" << chrono::duration_cast<chrono::milliseconds>(diff).count() << " ms" << endl;
+	output << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
+		
 	cout << "Start patterm matching" << endl;
-#if 1
+#if 0
 	string pfile_suffix[7] = {"p32.txt.gz","p64.txt.gz","p128.txt.gz","p256.txt.gz","p512.txt.gz","p1024.txt.gz","p2048.txt.gz"};
 	for(string ps : pfile_suffix){
 		string pfile = pfile_prefix + ps;

@@ -19,6 +19,7 @@
 #include <list>
 #include <cstdlib>
 #include <ctime>
+#include <malloc.h>
 
 #include "node.h"
 #include "defs.h"
@@ -45,6 +46,11 @@ int main (int argc, char ** argv )
 	ofstream result;
 	
 	double z = st.z;
+	
+	auto begin = get_time::now();
+	struct mallinfo2 mi;
+    mi = mallinfo2();
+	double begin_ram = mi.hblkhd + mi.uordblks;
 	string alphabet;
 	vector<vector<double>> text;
 	
@@ -62,11 +68,11 @@ int main (int argc, char ** argv )
         text.emplace_back(symbol);
     }
 
-	cout << "text length:" << N << endl;
-	cout << "Finish reading input" << endl;
+	// cout << "text length:" << N << endl;
+	// cout << "Finish reading input" << endl;
 	
-	auto begin = get_time::now();
-	cout << "index begin" << endl;
+
+	// cout << "index begin" << endl;
 	Estimation fS(text, alphabet, z);
 	PropertyString fT;
 	
@@ -89,10 +95,15 @@ int main (int argc, char ** argv )
 
 	vector<int> tmp_lcp ( LCP, LCP+Nz);
 	rmq_succinct_sct<> rmq ( &tmp_lcp );
+	vector<vector<double>>().swap(text);
 	
+	mi = mallinfo2();
+	
+	double end_ram = mi.hblkhd + mi.uordblks;
 	auto end = get_time::now();
 	auto diff2 = end - begin;
-	output_file<<"Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<"ms "<<endl;	
+	output_file<<"Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
+	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
 	
 	string pfile_suffix[7] = {"p32.txt.gz","p64.txt.gz","p128.txt.gz","p256.txt.gz","p512.txt.gz","p1024.txt.gz","p2048.txt.gz"};
 	for(string ps : pfile_suffix){	
