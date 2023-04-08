@@ -37,26 +37,28 @@ int lcp ( string & x, int M, string & y, int l, int * ME )
 
 int match ( string & pattern, string & text, int n, int * SA, int * LCP, int * ME, list<int> & Occ, rmq_succinct_sct<> &rmq )
 {
-	int P = pattern.size();
-	int N = text.size();
-	int L, R, M;
-	int l, r, m;
-	int num_Occ = 0;
-	int found_flag = 0;;
-	
-	int start = 0;
+	int64_t P = pattern.size();
+	int64_t N = text.size();
+	int64_t L, R, M;
+	int64_t l, r, m;
+	int64_t num_Occ = 0;
+	int64_t found_flag = 0;
+	int64_t zero = 0;
+
+	int64_t start = 0;
 	while(ME[SA[start]] == 0){
 		start++;
 	}
 
 	// LCP Match
 	l = lcp ( text, SA[start], pattern, 0 , ME);
+	
 	r = lcp ( text, SA[N-1], pattern, 0, ME);
-
+	
 #if	1 
 	if ( l == P )
 	{
-		int i = 1;
+		int64_t i = 1;
 		found_flag = 1;
 		L = start;
 		while(LCP[i] >= P){
@@ -75,9 +77,13 @@ int match ( string & pattern, string & text, int n, int * SA, int * LCP, int * M
 			if ( l >= r )
 			{
 				if ( LCP[rmq( L+1, M )] >= l )
+				{
 					m = l + lcp ( text, SA[M]+l, pattern, l, ME );
+				}
 				else
+				{
 					m = LCP[rmq( L+1, M )];
+				}
 			}
 			else
 			{
@@ -89,23 +95,23 @@ int match ( string & pattern, string & text, int n, int * SA, int * LCP, int * M
 			if ( m == P )
 			{
 				found_flag = 1;
-				int E = M;
+				int64_t E = M;
 				while ( L+1 < E )
 				{
-					int J = (L+E)/2;
+					int64_t J = (L+E)/2;
 					if ( LCP[rmq( J+1, E )] < P )
 						L = J;
 					else
 						E = J;
 				}
 				if ( LCP[rmq( L+1, E )] >= P )
-					L = max ( L, 0 );
+					L = max ( L, zero );
 				else
 					L = L+1;
 				E = M;
 				while( E + 1 < R )
 				{
-					int J = (E+R)/2;
+					int64_t J = (E+R)/2;
 					if ( LCP[rmq (E+1, J)] < P )
 						R = J;
 					else
@@ -117,7 +123,7 @@ int match ( string & pattern, string & text, int n, int * SA, int * LCP, int * M
 					R = R-1;
 				break;
 			}				
-			else if	( pattern[m] <= text[SA[M]+m] ) 
+			else if	( SA[M] + m < N && m < P  && pattern[m] <= text[SA[M]+m] ) 
 			{
 				R = M;
 				r = m;
@@ -131,7 +137,7 @@ int match ( string & pattern, string & text, int n, int * SA, int * LCP, int * M
 	}
 	if ( found_flag )
 	{
-		for ( int i = L; i <= R; i++ )
+		for ( int64_t i = L; i <= R; i++ )
 		{
 			if ( ME[SA[i]] >= P )
 			{
