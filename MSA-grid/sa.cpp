@@ -30,12 +30,12 @@
 using namespace std;
 using namespace sdsl;
 
-void right_compacted_trie ( unordered_set<int64_t > &anchors, int64_t  * SA, int64_t  * LCP, int64_t  n, int64_t  * RSA, int64_t  * RLCP, int64_t  g )
+void right_compacted_trie ( unordered_set<int > &anchors, int  * SA, int  * LCP, int  n, int  * RSA, int  * RLCP, int  g )
 {
-	int64_t  ii = 0; //this is the index over RSA[o..g-1] and the RLCP[0..g-1], where g is the number of anchors
-	int64_t  minLCP = n; //this is to maint64_t ain the minimum LCP in a range over LCP[i..j]: stores the LCP of SA[i] and SA[j]
+	int  ii = 0; //this is the index over RSA[o..g-1] and the RLCP[0..g-1], where g is the number of anchors
+	int  minLCP = n; //this is to maint ain the minimum LCP in a range over LCP[i..j]: stores the LCP of SA[i] and SA[j]
 
-	for( int64_t  i = 0; i < n; i++ ) // in lex order
+	for( int  i = 0; i < n; i++ ) // in lex order
 	{
 
 		/* If the ith lex suffix is an anchor then add it to the compacted trie (encoded in arrays RSA and RLCP) */
@@ -64,11 +64,11 @@ void right_compacted_trie ( unordered_set<int64_t > &anchors, int64_t  * SA, int
 }
 
 /* Constructs the left compacted trie given the anchors and the SA of the whole string in O(n) time */
-void left_compacted_trie ( unordered_set<int64_t > &anchors, int64_t  * SA, int64_t  * LCP, int64_t  n, int64_t  * RSA, int64_t  * RLCP, int64_t  g )
+void left_compacted_trie ( unordered_set<int > &anchors, int  * SA, int  * LCP, int  n, int  * RSA, int  * RLCP, int  g )
 {
-	int64_t  ii = 0;
-	int64_t  minLCP = n;
-	for( int64_t  i = 0; i < n; i++ ) // in lex order
+	int  ii = 0;
+	int  minLCP = n;
+	for( int  i = 0; i < n; i++ ) // in lex order
 	{
 		/* If the ith lex suffix is an anchor then add it to the compacted trie (encoded in arrays RSA and RLCP) */
 		auto it = anchors.find( ( n - 1) - SA[i] );
@@ -102,34 +102,34 @@ void left_compacted_trie ( unordered_set<int64_t > &anchors, int64_t  * SA, int6
 	}
 }
 
-int64_t  fast_RMQ ( int64_t  * arr, int64_t  L, int64_t  R, int64_t  n, std::unordered_map<pair<int64_t ,int64_t >, int64_t , boost::hash<pair<int64_t ,int64_t > >> &rmq )
-{
-	if ( R - L > 1 ) // int64_t ernal nodes
-	{
-		int64_t  M = (L+R)/2;
-		int64_t  a = fast_RMQ ( arr, L, M, n, rmq ); //Recurse on the left
-		int64_t  b = fast_RMQ ( arr, M, R, n, rmq ); //Recurse on the right
-		int64_t  value = std::min(a, b); 	     //This is the minimum of arr[L+1..M]
+// int  fast_RMQ ( int  * arr, int  L, int  R, int  n, std::unordered_map<pair<int ,int >, int , boost::hash<pair<int ,int > >> &rmq )
+// {
+	// if ( R - L > 1 ) // int ernal nodes
+	// {
+		// int  M = (L+R)/2;
+		// int  a = fast_RMQ ( arr, L, M, n, rmq ); //Recurse on the left
+		// int  b = fast_RMQ ( arr, M, R, n, rmq ); //Recurse on the right
+		// int  value = std::min(a, b); 	     //This is the minimum of arr[L+1..M]
 
-		pair<int64_t ,int64_t > p(L+1, R);
-		pair<pair<int64_t ,int64_t >,int64_t > np(p, value);
-		rmq.insert(np);
-		return value;
-	}
-	else  // Base case: leaf nodes
-	{
-		int64_t  value;
-		if ( R >= n ) value = 0;
-		else value = std::min (arr[L+1], arr[R]);
-		pair<int64_t ,int64_t > p(L+1, R);
-		pair<pair<int64_t ,int64_t >,int64_t > np(p, value);
-		rmq.insert(np);
-		return value;
-	}
-}
+		// pair<int ,int > p(L+1, R);
+		// pair<pair<int ,int >,int > np(p, value);
+		// rmq.insert(np);
+		// return value;
+	// }
+	// else  // Base case: leaf nodes
+	// {
+		// int  value;
+		// if ( R >= n ) value = 0;
+		// else value = std::min (arr[L+1], arr[R]);
+		// pair<int ,int > p(L+1, R);
+		// pair<pair<int ,int >,int > np(p, value);
+		// rmq.insert(np);
+		// return value;
+	// }
+// }
 
 
-int64_t  LCParray ( unsigned char * text, size_t n, int64_t  * SA, int64_t  * ISA, int64_t  * LCP )
+int  LCParray ( unsigned char * text, size_t n, int  * SA, int  * ISA, int  * LCP )
 {
         size_t i=0, j=0;
 

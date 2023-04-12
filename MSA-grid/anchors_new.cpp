@@ -36,16 +36,16 @@ using namespace std;
 using namespace boost;
 
 /* Computes the minimizers of a string using Karp & Rabin fingerprints -- Algorithm 1 from Jain et al. */
-void minimizers_with_kr(string const &whole_string, vector<int64_t > &M, int64_t  w, int64_t  k)
+void minimizers_with_kr(string const &whole_string, vector<int> &M, int  w, int  k)
 {   
-	deque<pair<int64_t, string> > Q;
-	int64_t  hash_string_in_win;
-	int64_t  min_pos;
-	int64_t  whole_string_len = whole_string.size();
-	int64_t  start_pos = 0;
+	deque<pair<int, string> > Q;
+	int  hash_string_in_win;
+	int  min_pos;
+	int  whole_string_len = whole_string.size();
+	int  start_pos = 0;
 	string cur_str;
 
-	for(int64_t  i = 0; i < (whole_string_len-k); ++i)	   
+	for(int  i = 0; i < (whole_string_len-k); ++i)	   
 	{      	 	
 		cur_str = whole_string.substr(i,k);		 			
 		
@@ -53,7 +53,7 @@ void minimizers_with_kr(string const &whole_string, vector<int64_t > &M, int64_t
 			Q.pop_back();
 		}
 
-		pair<int64_t, string> p(i,cur_str);
+		pair<int, string> p(i,cur_str);
 		Q.push_back(p);
 		
 		if(Q.front().first <=i-w)
@@ -65,12 +65,12 @@ void minimizers_with_kr(string const &whole_string, vector<int64_t > &M, int64_t
 		{
 			if(M.empty())
 			{
-				pair<int64_t, string> p(Q.front().first,Q.front().second);
+				pair<int, string> p(Q.front().first,Q.front().second);
 				M.push_back(p.first);
 			}
 			else if(M.back() != Q.front().first)
 			{
-				pair<int64_t, string> p(Q.front().first,Q.front().second);
+				pair<int, string> p(Q.front().first,Q.front().second);
 				M.push_back(p.first);
 			}
 		}
@@ -85,7 +85,7 @@ void minimizers_with_kr(string const &whole_string, vector<int64_t > &M, int64_t
 				Q.pop_front();	
 				if(M.back()!=Q.front().first)
 				{
-					pair<int64_t, string> p(Q.front().first,Q.front().second);
+					pair<int, string> p(Q.front().first,Q.front().second);
 					M.push_back(p.first);		 
 				}
 			}

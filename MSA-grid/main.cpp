@@ -51,7 +51,7 @@ bool sort_sa(const pair<int,int> &a,const pair<int,int> &b)
        return a.first<b.first;
 }
 
-bool is_valid(vector<vector<double>>& text, string& alph, string& p, int64_t   pos, double z){
+bool is_valid(vector<vector<double>>& text, string& alph, string& p, int   pos, double z){
 		unordered_map<char, int> mapping;
 		pos = pos%(text.size());
 		if(pos + p.size() > text.size()) return false;
@@ -83,14 +83,14 @@ int main (int argc, char ** argv )
 	vector<vector<double>> text;
 	vector<vector<double>> rev_text;
 
-	int64_t   N;
+	int   N;
 	text_file >> N;
 	text_file >> alphabet;
-	int64_t   A = alphabet.size();
-	for (int64_t   i = 0; i < N; ++i) {
+	int   A = alphabet.size();
+	for (int   i = 0; i < N; ++i) {
         double sum = 0;
         vector<double> symbol(A, 0);
-        for (int64_t   j = 0; j < A; ++j) {
+        for (int   j = 0; j < A; ++j) {
             text_file >> symbol[j];
             sum += symbol[j];
         }
@@ -108,13 +108,13 @@ int main (int argc, char ** argv )
 	cout << "index begin" << endl;
 	Estimation fS(text, alphabet, z);
 	string zstrs;
-	unordered_set<int64_t> f_mini_pos;
+	unordered_set<int> f_mini_pos;
 	
-	int64_t   ii = 0;
+	int   ii = 0;
 	for(PropertyString const & s : fS.strings()){
 		//fT += s;
 		zstrs += s.string();
-		std::vector<int64_t  > M;
+		std::vector<int  > M;
 		minimizers_with_kr(s.string(), M,w, k);
 		for(auto it : M){
 			if(s._pi[it] >= k){
@@ -124,40 +124,40 @@ int main (int argc, char ** argv )
 		ii++;
 	}
 	
-	int64_t   Nz = zstrs.size();
-	int64_t   g = f_mini_pos.size();
+	int   Nz = zstrs.size();
+	int   g = f_mini_pos.size();
 	string rev_zstrs(zstrs.rbegin(), zstrs.rend());
 
 	HeavyString fH(text, zstrs, alphabet);
 
-	int64_t   * fSA		= new int64_t   [Nz];
-	int64_t   * fLCP	= new int64_t   [Nz];
-	int64_t   * rSA		= new int64_t   [Nz];
-	int64_t   * rLCP	= new int64_t   [Nz];
+	int   * fSA		= new int   [Nz];
+	int   * fLCP	= new int   [Nz];
+	int   * rSA		= new int   [Nz];
+	int   * rLCP	= new int   [Nz];
 	
 	begin = get_time::now();
 	unsigned char * seq = (unsigned char *)zstrs.c_str();
-	divsufsort64( seq, fSA,  Nz );
-	int64_t  * iSA = new int64_t   [Nz];
-	for(int64_t  i = 0; i < Nz; i++){
+	divsufsort( seq, fSA,  Nz );
+	int  * iSA = new int   [Nz];
+	for(int  i = 0; i < Nz; i++){
 		iSA[fSA[i]] = i;
 	}
 	LCParray( seq, Nz, fSA, iSA, fLCP );
 	
 	seq = (unsigned char *)rev_zstrs.c_str();
-	divsufsort64( seq, rSA,  Nz );
+	divsufsort( seq, rSA,  Nz );
 	
-	for(int64_t   i = 0; i < Nz; i++){
+	for(int   i = 0; i < Nz; i++){
 		iSA[rSA[i]] = i;
 	}
 	LCParray( seq, Nz, rSA, iSA, rLCP );
 	
 	fS.clear();
 
-	int64_t   * RSA	 = new int64_t   [g];
-	int64_t   * RLCP = new int64_t   [g];
-	int64_t   * LSA	 = new int64_t   [g];
-	int64_t   * LLCP = new int64_t   [g];
+	int   * RSA	 = new int   [g];
+	int   * RLCP = new int   [g];
+	int   * LSA	 = new int   [g];
+	int   * LLCP = new int   [g];
 	
 	right_compacted_trie ( f_mini_pos, fSA, fLCP, Nz, RSA, RLCP, g );
 	left_compacted_trie ( f_mini_pos, rSA, rLCP, Nz, LSA, LLCP, g );
@@ -177,9 +177,9 @@ int main (int argc, char ** argv )
 	vector<int>().swap(tmp_llcp);
 	vector<int>().swap(tmp_rlcp);
 
-	vector<pair<int64_t  ,int64_t  >> l;
-	vector<pair<int64_t  ,int64_t  >> r;
-	for ( int64_t   i = 0; i < g; i++ )
+	vector<pair<int  ,int  >> l;
+	vector<pair<int  ,int  >> r;
+	for ( int   i = 0; i < g; i++ )
   	{
   		l.push_back( make_pair( Nz-1-LSA[i], i) );
  		r.push_back( make_pair( RSA[i], i ) );	
@@ -190,7 +190,7 @@ int main (int argc, char ** argv )
 
   	std::vector<point> points;
   	  	
-  	for ( int64_t   i = 0; i < g; i++ )
+  	for ( int   i = 0; i < g; i++ )
   	{
  
 		point to_insert;
@@ -207,8 +207,8 @@ int main (int argc, char ** argv )
   	grid construct;
   	construct.build( points, 0 );
   	
-	vector<pair<int64_t  ,int64_t  >>().swap(l);
-	vector<pair<int64_t  ,int64_t  >>().swap(r);
+	vector<pair<int  ,int  >>().swap(l);
+	vector<pair<int  ,int  >>().swap(r);
 	vector<point>().swap(points);
 	
 	mi = mallinfo2();
@@ -234,10 +234,10 @@ int main (int argc, char ** argv )
 			size_t j = find_minimizer_index(pattern, k);
 			string left_pattern = pattern.substr(0, j+1);
 			reverse(left_pattern.begin(), left_pattern.end());
-			pair<int64_t ,int64_t> left_interval = rev_pattern_matching ( left_pattern, fH, LSA, LLCP, lrmq, g ); 
+			pair<int64_t ,int64_t> left_interval = rev_pattern_matching ( left_pattern, fH, LSA, LLCP, lrmq, (int64_t)g ); 
 
 			string right_pattern = pattern.substr(j);
-			pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, g ); 
+			pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g ); 
 			
 			if ( left_interval.first <= left_interval.second  && right_interval.first <= right_interval.second )
 			{
@@ -253,7 +253,7 @@ int main (int argc, char ** argv )
 				construct.search_2d(rectangle, result);
 			
 				set<int64_t> valid_res;
-				for(int64_t i = 0; i < result.size(); i++){
+				for(size_t i = 0; i < result.size(); i++){
 					if(is_valid(text, alphabet, pattern, (RSA[result.at(i)-1]-j), z)){
 						valid_res.insert((RSA[result.at(i)-1]-j)%N);
 					}

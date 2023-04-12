@@ -42,7 +42,7 @@ int64_t  lcp ( HeavyString & x, int64_t  M, string & y, int64_t  l )
 }
 
 /* Searching a list of strings using LCP from "Algorithms on Strings" by Crochemore et al. Algorithm takes O(m + log n), where n is the list size and m the length of pattern */
-pair<int64_t ,int64_t > pattern_matching ( string & w, HeavyString & a, int * SA, int  * LCP, rmq_succinct_sct<> &rmq, int  n )
+pair<int64_t ,int64_t > pattern_matching ( string & w, HeavyString & a, int  * SA, int  * LCP, rmq_succinct_sct<> &rmq, int64_t  n )
 {
 	int64_t  m = w.size(); //length of pattern
 	int64_t  N = a.size(); //length of string 
@@ -164,7 +164,7 @@ int64_t  lcs ( HeavyString & x, int64_t  M, string & y, int64_t  l )
 
 
 /* Searching a list of strings using LCP from "Algorithms on Strings" by Crochemore et al. Algorithm takes O(m + log n), where n is the list size and m the length of pattern */
-pair<int64_t ,int64_t > rev_pattern_matching ( string & w, HeavyString & a, int  * SA, int  * LCP, rmq_succinct_sct<> &rmq, int  n )
+pair<int64_t ,int64_t > rev_pattern_matching ( string & w, HeavyString & a, int  * SA, int  * LCP, rmq_succinct_sct<> &rmq, int64_t  n )
 {
 	int64_t  m = w.size(); //length of pattern
 	int64_t  N = a.size(); //length of string 

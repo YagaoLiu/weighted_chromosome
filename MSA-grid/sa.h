@@ -15,8 +15,8 @@
 using namespace std;
 using namespace sdsl;
 
-void right_compacted_trie ( unordered_set<int64_t > &anchors, int64_t  * SA, int64_t  * LCP, int64_t  n, int64_t  * RSA, int64_t  * RLCP, int64_t  g );
-void left_compacted_trie ( unordered_set<int64_t > &anchors, int64_t  * SA, int64_t  * LCP, int64_t  n, int64_t  * RSA, int64_t  * RLCP, int64_t  g );
-int64_t  LCParray ( unsigned char * text, size_t n, int64_t  * SA, int64_t  * ISA, int64_t  * LCP );
+void right_compacted_trie ( unordered_set<int > &anchors, int  * SA, int  * LCP, int  n, int  * RSA, int  * RLCP, int  g );
+void left_compacted_trie ( unordered_set<int > &anchors, int * SA, int  * LCP, int  n, int  * RSA, int  * RLCP, int  g );
+int  LCParray ( unsigned char * text, size_t n, int  * SA, int  * ISA, int  * LCP );
 
 
