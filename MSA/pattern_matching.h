@@ -17,7 +17,7 @@ using namespace std;
 using namespace sdsl;
 
 int64_t find_minimizer_index(string s, int64_t k);
-pair<int64_t,int64_t> pattern_matching ( string & w, HeavyString & a, int64_t * SA, int64_t * LCP, rmq_succinct_sct<> &rmq, int64_t n );
-pair<int64_t,int64_t> rev_pattern_matching ( string & w, HeavyString & a, int64_t * SA, int64_t * LCP, rmq_succinct_sct<> &rmq, int64_t n );
+pair<int64_t,int64_t> pattern_matching ( string & w, HeavyString & a, int * SA, int * LCP, rmq_succinct_sct<> &rmq, int64_t n );
+pair<int64_t,int64_t> rev_pattern_matching ( string & w, HeavyString & a, int * SA, int * LCP, rmq_succinct_sct<> &rmq, int64_t n );
 
 #endif
