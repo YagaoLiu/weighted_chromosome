@@ -162,17 +162,17 @@ int main (int argc, char ** argv )
 	
 	right_compacted_trie ( f_mini_pos, fSA, fLCP, Nz, RSA, RLCP, g );
 	left_compacted_trie ( f_mini_pos, rSA, rLCP, Nz, LSA, LLCP, g );
-
+	
 	delete[] fSA;
 	delete[] fLCP;
 	delete[] rSA;
 	delete[] rLCP;
-	
-	vector<int> tmp_llcp(LLCP, LLCP+Nz);
-	vector<int> tmp_rlcp(RLCP, RLCP+Nz);	
+
+	vector<int> tmp_llcp(LLCP, LLCP+g);
+	vector<int> tmp_rlcp(RLCP, RLCP+g);	
 	rmq_succinct_sct<> lrmq ( &tmp_llcp );
 	rmq_succinct_sct<> rrmq ( &tmp_rlcp );
-	
+
 	string().swap(zstrs);
 	string().swap(rev_zstrs);	
 	vector<int>().swap(tmp_llcp);
@@ -207,6 +207,8 @@ int main (int argc, char ** argv )
   	//constructing grid with bd-anchors
   	grid construct;
   	construct.build( points, 0 );
+
+	cout << "grid index constructed" << endl;
   	
 	vector<pair<int  ,int  >>().swap(l);
 	vector<pair<int  ,int  >>().swap(r);
