@@ -81,7 +81,6 @@ int main (int argc, char ** argv )
 
 	string alphabet;
 	vector<vector<double>> text;
-	vector<vector<double>> rev_text;
 
 	int   N;
 	text_file >> N;
@@ -99,8 +98,9 @@ int main (int argc, char ** argv )
             throw 1;
         }
         text.emplace_back(symbol);
-		rev_text.emplace(rev_text.begin(), symbol);
     }
+	vector<vector<double>> rev_text(text.rbegin(), text.rend());
+	
 	int k = ceil(3 + log2(ell) / log2(alphabet.size()));
 	int w = ell - k + 1;
 
