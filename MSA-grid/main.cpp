@@ -167,7 +167,7 @@ int main (int argc, char ** argv )
 	delete[] fLCP;
 	delete[] rSA;
 	delete[] rLCP;
-
+	
 	vector<int> tmp_llcp(LLCP, LLCP+g);
 	vector<int> tmp_rlcp(RLCP, RLCP+g);	
 	rmq_succinct_sct<> lrmq ( &tmp_llcp );
