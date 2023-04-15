@@ -64,7 +64,7 @@ Settings decode_switches (int argc, char * argv[]) {
 				if( optarg == ep) throw 1;
 				break;
             case 'p':
-                st.patterns = std::ifstream(optarg);
+                st.patterns = optarg;
                 break;
             case 'o':
                 st.output = std::ofstream(optarg);

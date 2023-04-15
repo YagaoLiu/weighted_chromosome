@@ -19,7 +19,7 @@
 struct Settings {
 	double z;
 	std::ifstream text;
-	std::ifstream patterns;
+	std::string patterns;
 	std::ofstream output;
     bool quiet;
 	int ell;
