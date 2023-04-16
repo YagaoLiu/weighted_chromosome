@@ -108,7 +108,7 @@ void MinimizerIndex::build_index(double z, int ell){
 	vector<int>& f_pi = fT._pi;
 	vector<int> r_pi;
 	for(auto i : f_mini_pos){
-		r_mini_pos.push_back(zstrs.size() - i - 1);
+		r_mini_pos.push_back(zstrs.size() - i);
 	}
 	property_computer(fP, zstrs, alph, f_pi,z);
 	property_computer(rP, rev_zstrs, alph, r_pi,z);
