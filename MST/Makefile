@@ -10,7 +10,7 @@ EXE=   index
  
 SRC=    main.cpp input.cpp estimation.cpp PST.cpp property_string.cpp anchors_new.cpp minimizer_index.cpp heavy_string.cpp
 
-HD=     input.h PST.h estimation.h property_string.h anchors_new.h minimizer_index.h minimizer.h heavy_string.h Makefile
+HD=     input.h PST.h estimation.h property_string.h anchors_new.h minimizer_index.h heavy_string.h Makefile
 
 # 
 # No need to edit below this line 
