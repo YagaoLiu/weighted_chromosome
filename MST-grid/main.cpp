@@ -62,16 +62,16 @@ int main (int argc, char ** argv ) {
 		patterns.push(file);	
 		begin = get_time::now();
 		for (string pattern; getline(patterns, pattern); ){
-			output_file << pattern << ": ";
+			// output_file << pattern << ": ";
 			std::vector<int> occs = M.GridMatch(pattern, ell, st.z);
-			if (occs.empty()) {
-				output_file << "Not found\n";
-			} else {
-				for (auto p : occs) {
-					output_file << p << " ";
-				}
-				output_file << endl;
-			}
+			// if (occs.empty()) {
+				// output_file << "Not found\n";
+			// } else {
+				// for (auto p : occs) {
+					// output_file << p << " ";
+				// }
+				// output_file << endl;
+			// }
 		}
 		end = get_time::now();
 		auto diff = end - begin;
