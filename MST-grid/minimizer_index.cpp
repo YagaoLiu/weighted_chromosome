@@ -94,7 +94,7 @@ void MinimizerIndex::build_index(double z, int ell){
 	int i = 0;
 	int k = ceil(3 + log2(ell) / log2(alph.size()));
 	int w = ell - k + 1;
-
+	
 	for(PropertyString const & s : fS.strings()){
 		fT += s;
 		std::vector<int> M;
@@ -117,7 +117,6 @@ void MinimizerIndex::build_index(double z, int ell){
 	HeavyString fH(fP, zstrs, alph);
 	HeavyString rH(rP, rev_zstrs, alph);
 	Nz = zstrs.size();
-	cout << r_mini_pos.size() << endl;
 	forward_index = new PropertySuffixTree(f_pi, fH,f_mini_pos);
 //	forward_index->minimizer_trim(f_pi, f_mini_pos);
 	reverse_index = new PropertySuffixTree(r_pi, rH, r_mini_pos);

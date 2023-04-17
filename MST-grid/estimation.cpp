@@ -76,7 +76,9 @@ void Node::copy(Node* original, double p, char a) {
 }
 
 Node::~Node() {
-    for (auto c : children) delete c;
+	parent = NULL;
+	vector<Node*>().swap(children);
+	vector<TokenRequest>().swap(requests);
 }
 
 
@@ -113,6 +115,26 @@ int heavy(vector<double> const& symbol) {
     return r;
 }
 
+void deleteTree(Node *root){
+	if(root == NULL)
+		return;
+	
+	queue<Node*> q;
+	
+	q.push(root);
+	while(!q.empty()){
+		Node * node = q.front();
+		q.pop();
+		
+		if(!node->children.empty()){
+			for(auto c : node->children){
+				q.push(c);
+			}
+		}
+		
+		delete node;
+	}
+}
 
 Estimation::Estimation(std::vector<std::vector<double>> const& probability, std::string const& sigma, double z) {
     int n = probability.size();
@@ -153,7 +175,7 @@ Estimation::Estimation(std::vector<std::vector<double>> const& probability, std:
             t.S.pi(i) = t.depth;
         }
     }
-    delete root;
+    deleteTree( root );
 }
 
 std::ostream& operator <<(std::ostream &out, Estimation const &E) {
