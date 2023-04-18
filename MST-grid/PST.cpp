@@ -44,19 +44,12 @@ void PropertySuffixTree::stNode::list(vector<int>& l) const {
     for (auto const &p : children) p.second->list(l);
 }
 
-void PropertySuffixTree::stNode::SAlist(vector<int>& l) const {
-    l.insert(l.end(), SAinterval.begin(), SAinterval.end());
-    for (auto const &p : children) p.second->SAlist(l);
-}
-
-
-
 void PropertySuffixTree::stNode::print(ostream &out, int d) const {
     for (int i = 0; i < d; ++i) out << " ";
     if (d >= 0) for (auto it = begin; it != end; ++it) out << *it;
     d += end-begin;
-    for (auto const &l : labels) out << " " << l;
-	for (auto const &i : SAinterval) out <<  " " << i;
+    //for (auto const &l : labels) out << " " << l;
+	out <<  " " << SAinterval.first << " " << SAinterval.second;
     out << endl;
     for (auto const &ch : children) ch.second->print(out, d);
 }
@@ -274,17 +267,9 @@ vector<int> PropertySuffixTree::occurrences(string const& s) const {
 pair<int,int> PropertySuffixTree::SAoccurrences(string const& s) const {
 	HeavyString P(s);
     PropertySuffixTree::Locus l = find(P);
-	pair<int,int> df;
-	df.first = 0;
-	df.second = -1;
-    vector<int> res;
-    if (l.end != P.end()) return df;
-    stNode* top = l.descendant();
-    top->SAlist(res);
-	auto df_it = std::minmax_element(res.begin(), res.end());
-	df.first = *df_it.first;
-	df.second = *df_it.second;
-    return df;
+    if (l.end != P.end()) return pair<int,int>(0,-1);
+	stNode* top = l.descendant();
+    return top->SAinterval;
 }
 
 
@@ -320,14 +305,16 @@ std::vector<int> PropertySuffixTree::toSA(){
 	stack<stNode*> Q;
 	Q.push(root);
 	vector<int> SA;
+	stack<stNode*> dfs_order;
 	
 	while(!Q.empty()){
 		cur = Q.top();
+		dfs_order.push(cur);
 		Q.pop();
-		if( (!cur->labels.empty()) && (cur != root)){
-			cur->SAinterval.push_back(SA.size());
+		if( cur != root){
+			cur->SAinterval.first = SA.size();
 			SA.insert(SA.end(), cur->labels.begin(), cur->labels.end());
-			cur->SAinterval.push_back(SA.size()-1);
+			cur->SAinterval.second = SA.size()-1;
 		}
 		
 		if(!cur->children.empty()){
@@ -338,5 +325,22 @@ std::vector<int> PropertySuffixTree::toSA(){
 			}
 		}
 	}
+	
+	while(!dfs_order.empty()){
+		cur = dfs_order.top();
+		dfs_order.pop();
+		
+		int right = cur->SAinterval.second;
+		
+		if(!cur->children.empty()){
+			vector<pair<char, stNode*>> children(cur->children.begin(), cur->children.end());
+			for(auto c : children){
+				if(right < c.second->SAinterval.second)
+					right = c.second->SAinterval.second;
+			}
+		}
+		cur->SAinterval.second = right;
+	}		
+
 	return SA;
 }

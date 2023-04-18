@@ -28,7 +28,7 @@ class PropertySuffixTree {
         unordered_map<char, stNode*> children;
         position begin, end; 
         vector<int> labels;
-		vector<int> SAinterval;
+		pair<int,int> SAinterval;
 		bool keeper = false;
         
         stNode(position const &begin, position const &end);
@@ -41,7 +41,6 @@ class PropertySuffixTree {
         stNode* trim(bool is_root = false);
 		stNode* keeper_trim(bool is_root = false);
         void list(vector<int> &l) const;
-		void SAlist(vector<int> &l) const;
     };
     
     struct Locus {

@@ -152,10 +152,7 @@ void MinimizerIndex::build_index(double z, int ell){
   	construct.build( points, 0 );
 	
 	fS.clear();
-	fT.clear();
-	std::vector<int>().swap(f_mini_pos);
-	std::vector<int>().swap(r_mini_pos);
-	
+	fT.clear();	
 }
 
 int  find_minimizer_index(string s, int  k) {
@@ -222,7 +219,6 @@ std::vector<int> MinimizerIndex::GridMatch(std::string const& pattern, int ell, 
 	pair<int,int> left_interval = reverse_index->SAoccurrences(left_pattern);
 	string right_pattern = pattern.substr(min_index);
 	pair<int,int> right_interval = forward_index->SAoccurrences(right_pattern);
-	
 	if ( left_interval.first <= left_interval.second  && right_interval.first <= right_interval.second ){
 			
 		//Finding rectangle containing bd-anchors in grid
