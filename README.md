@@ -20,6 +20,7 @@ Run the following scripts to get patterns with certain z:
 The patterns are saved in `patterns` folder.
 
 The length of chr22, after removing the multiply 'N' at the beginning and ending, is 35194566. (35.2*10^6)
-
+The length of Enterococcus Faecium(efm) is 2955294.
+The length of SARS-coronavirus 2 (sars) is 30330.
 
 
