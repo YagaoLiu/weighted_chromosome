@@ -6,7 +6,7 @@ gzip ./patterns/efm_z8p256.txt
 gzip ./patterns/efm_z8p512.txt
 gzip ./patterns/efm_z8p1024.txt
 gzip ./patterns/efm_z8p2048.txt
-./index -t efm.i/efm_z16p32.txtn -z 16 -o ./patterns/efm_z16
+./index -t efm.in -z 16 -o ./patterns/efm_z16
 gzip ./patterns/efm_z16p32.txt
 gzip ./patterns/efm_z16p64.txt
 gzip ./patterns/efm_z16p128.txt
