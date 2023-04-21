@@ -69,9 +69,8 @@ void WeightedSequence::build_index(double z, bool quiet, std::ostream& result) {
     for (PropertyString const & s : S.strings()) {
         T += s;
     }
-	auto begin_mem = get_mem_usage();
     weighted_index = new PropertySuffixTree(T);
-    
+    std::vector<vector<double>>().swap(P);
 }
 
 bool WeightedSequence::contains(std::string const& P) const {
