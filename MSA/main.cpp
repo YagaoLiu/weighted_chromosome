@@ -99,7 +99,6 @@ int main (int argc, char ** argv )
         }
         text.emplace_back(symbol);
     }
-	vector<vector<double>> rev_text(text.rbegin(), text.rend());
 	
 	int k = ceil(3 + log2(ell) / log2(alphabet.size()));
 	int w = ell - k + 1;
@@ -166,6 +165,7 @@ int main (int argc, char ** argv )
 	delete[] fLCP;
 	delete[] rSA;
 	delete[] rLCP;
+	delete[] iSA;
 	
 	vector<int> tmp_llcp(LLCP, LLCP+g);
 	vector<int> tmp_rlcp(RLCP, RLCP+g);	
