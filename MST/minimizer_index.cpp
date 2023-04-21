@@ -95,14 +95,13 @@ void MinimizerIndex::build_index(double z, int ell){
 		std::vector<int> M;
 		minimizers_with_kr(s.string(), M, w, k);		
 		for(auto it : M){
-				f_mini_pos.emplace_back(it + i*N);
+			f_mini_pos.emplace_back(it + i*N);
 		}
 		i++;
 	}
-	
 	string zstrs = fT.string();
 	string rev_zstrs(zstrs.rbegin(), zstrs.rend());
-	vector<int>& f_pi = fT._pi;
+	vector<int> f_pi;
 	vector<int> r_pi;
 	for(auto i : f_mini_pos){
 		r_mini_pos.push_back(zstrs.size() - i);
