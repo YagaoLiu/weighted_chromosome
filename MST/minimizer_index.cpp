@@ -34,8 +34,6 @@ std::istream & operator >> (std::istream& input, MinimizerIndex &M) {
         }
         M.fP.emplace_back(symbol);
     }
-	M.rP = M.fP;
-	reverse(M.rP.begin(), M.rP.end());
  	return input;
 }
 
@@ -83,10 +81,9 @@ void property_computer(vector<vector<double>>& matrix, string& text, string& A, 
 }
 
 void MinimizerIndex::build_index(double z, int ell){
+	vector<vector<double>> rP(fP.rbegin(), fP.rend());
 	Estimation fS(fP,alph,z);
-	Estimation rS(rP,alph,z);
 	PropertyString fT;
-	PropertyString rT;
 	std::vector<int> f_mini_pos;
 	std::vector<int> r_mini_pos;
 	int i = 0;
@@ -117,18 +114,13 @@ void MinimizerIndex::build_index(double z, int ell){
 	HeavyString rH(rP, rev_zstrs, alph);
 
 	forward_index = new PropertySuffixTree(f_pi, fH,f_mini_pos);
-//	forward_index->minimizer_trim(f_pi, f_mini_pos);
 	reverse_index = new PropertySuffixTree(r_pi, rH, r_mini_pos);
-//	reverse_index->minimizer_trim(r_pi, r_mini_pos);
+	
 	fS.clear();
-	rS.clear();
-	fT.clear();
-	rT.clear();
-	std::vector<int>().swap(f_mini_pos);
-	std::vector<int>().swap(r_mini_pos);
+	fT.clear();	
 }
 
-std::vector<int> MinimizerIndex::occurrences(std::string const &P, int ell, double z, std::ostream& result) const{
+std::vector<int> MinimizerIndex::occurrences(std::string const &P, int ell, double z) const{
 	int m = P.size();
 	vector<int> integer_str;
 	for(int i = 0; i < m; i++){
@@ -137,7 +129,7 @@ std::vector<int> MinimizerIndex::occurrences(std::string const &P, int ell, doub
 	int k = ceil(3 + log2(ell) / log2(alph.size()));
 	std::string minimizer = P.substr(0,k);
 	int min_index = 0;
-	for(size_t i = 1; i < m-k; i++){
+	for(int i = 1; i < m-k; i++){
 		std::string kmer = P.substr(i,k);
 		if(kmer < minimizer){
 			minimizer = kmer;

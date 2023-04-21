@@ -65,7 +65,7 @@ int main (int argc, char ** argv ) {
 		begin = get_time::now();
 		for (string pattern; getline(patterns, pattern); ){
 			//output << pattern << ": ";
-			std::vector<int> occs = M.occurrences(pattern, ell, st.z, output_file);
+			std::vector<int> occs = M.occurrences(pattern, ell, st.z);
 			// if (occs.empty()) {
 				// output << "Not found\n";
 			// } else {
