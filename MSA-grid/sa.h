@@ -18,5 +18,6 @@ using namespace sdsl;
 void right_compacted_trie ( unordered_set<int > &anchors, int  * SA, int  * LCP, int  n, int  * RSA, int  * RLCP, int  g );
 void left_compacted_trie ( unordered_set<int > &anchors, int * SA, int  * LCP, int  n, int  * RSA, int  * RLCP, int  g );
 int  LCParray ( unsigned char * text, size_t n, int  * SA, int  * ISA, int  * LCP );
+void extention ( vector<vector<double>>& text, string& s, string& alph, vector<int>& le, vector<int>& re, double z );
 
 

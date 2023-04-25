@@ -51,19 +51,19 @@ bool sort_sa(const pair<int,int> &a,const pair<int,int> &b)
        return a.first<b.first;
 }
 
-bool is_valid(vector<vector<double>>& text, string& alph, string& p, int   pos, double z){
-		unordered_map<char, int> mapping;
-		pos = pos%(text.size());
-		if(pos + p.size() > text.size()) return false;
-		for(int i = 0; i < alph.size(); i++){
-			mapping[alph[i]] = i;
-		}
-		double cum_prob = 1;
-		for(int i = 0; i < p.size(); i++){
-			cum_prob *= text[pos+i][mapping[p[i]]];
-		}
-		return (cum_prob*z >= 1)?true:false;
-}
+// bool is_valid(vector<vector<double>>& text, string& alph, string& p, int   pos, double z){
+		// unordered_map<char, int> mapping;
+		// pos = pos%(text.size());
+		// if(pos + p.size() > text.size()) return false;
+		// for(int i = 0; i < alph.size(); i++){
+			// mapping[alph[i]] = i;
+		// }
+		// double cum_prob = 1;
+		// for(int i = 0; i < p.size(); i++){
+			// cum_prob *= text[pos+i][mapping[p[i]]];
+		// }
+		// return (cum_prob*z >= 1)?true:false;
+// }
 
 int main (int argc, char ** argv )
 {
@@ -72,6 +72,7 @@ int main (int argc, char ** argv )
 	ostream& output_file = st.output.is_open()?st.output:cout;
 	ofstream result;
 	
+	auto begin = get_time::now();
 	struct mallinfo2 mi;
     mi = mallinfo2();
 	double begin_ram = mi.hblkhd + mi.uordblks;
@@ -81,7 +82,6 @@ int main (int argc, char ** argv )
 
 	string alphabet;
 	vector<vector<double>> text;
-	
 
 	int   N;
 	text_file >> N;
@@ -101,10 +101,10 @@ int main (int argc, char ** argv )
         text.emplace_back(symbol);
     }
 	cout << "finish reading" << endl;
-	int k = ceil(3 + log2(ell) / log2(alphabet.size()));
+	
+	int k = ceil(4 * log2(ell) / log2(alphabet.size()));
 	int w = ell - k + 1;
-
-	auto begin = get_time::now();
+	
 	cout << "index begin" << endl;
 	Estimation fS(text, alphabet, z);
 	string zstrs;
@@ -112,7 +112,6 @@ int main (int argc, char ** argv )
 	
 	int   ii = 0;
 	for(PropertyString const & s : fS.strings()){
-		//fT += s;
 		zstrs += s.string();
 		std::vector<int  > M;
 		minimizers_with_kr(s.string(), M,w, k);
@@ -126,57 +125,67 @@ int main (int argc, char ** argv )
 	
 	int   Nz = zstrs.size();
 	int   g = f_mini_pos.size();
+	
 	string rev_zstrs(zstrs.rbegin(), zstrs.rend());
+	vector<int> le;
+	vector<int> re;
+	extention(text, zstrs, alphabet, le, re, z);
 
-	HeavyString fH(text, zstrs, alphabet);
-
-	int   * fSA		= new int   [Nz];
-	int   * fLCP	= new int   [Nz];
-	int   * rSA		= new int   [Nz];
-	int   * rLCP	= new int   [Nz];
+	HeavyString fH(text, zstrs, alphabet, f_mini_pos, le, re);
+	
+	fS.clear();
+	vector<vector<double>>().swap(text);
+	vector<int>().swap(le);
+	vector<int>().swap(re);
+	
+	int   * forward_SA		= new int   [Nz];
+	int   * forward_LCP	= new int   [Nz];
+	int   * reverse_SA		= new int   [Nz];
+	int   * reverse_LCP	= new int   [Nz];
 	
 	begin = get_time::now();
 	unsigned char * seq = (unsigned char *)zstrs.c_str();
-	divsufsort( seq, fSA,  Nz );
+	divsufsort( seq, forward_SA,  Nz );
 	int  * iSA = new int   [Nz];
 	for(int  i = 0; i < Nz; i++){
-		iSA[fSA[i]] = i;
+		iSA[forward_SA[i]] = i;
 	}
-	LCParray( seq, Nz, fSA, iSA, fLCP );
+	LCParray( seq, Nz, forward_SA, iSA, forward_LCP );
 	
 	seq = (unsigned char *)rev_zstrs.c_str();
-	divsufsort( seq, rSA,  Nz );
+	divsufsort( seq, reverse_SA,  Nz );
 	
 	for(int   i = 0; i < Nz; i++){
-		iSA[rSA[i]] = i;
+		iSA[reverse_SA[i]] = i;
 	}
-	LCParray( seq, Nz, rSA, iSA, rLCP );
+	LCParray( seq, Nz, reverse_SA, iSA, reverse_LCP );
 	
-	fS.clear();
+
+	delete[] iSA;
 
 	int   * RSA	 = new int   [g];
 	int   * RLCP = new int   [g];
 	int   * LSA	 = new int   [g];
 	int   * LLCP = new int   [g];
 	
-	right_compacted_trie ( f_mini_pos, fSA, fLCP, Nz, RSA, RLCP, g );
-	left_compacted_trie ( f_mini_pos, rSA, rLCP, Nz, LSA, LLCP, g );
-	
-	delete[] fSA;
-	delete[] fLCP;
-	delete[] rSA;
-	delete[] rLCP;
-	delete[] iSA;
-	
-	vector<int> tmp_llcp(LLCP, LLCP+g);
-	vector<int> tmp_rlcp(RLCP, RLCP+g);	
-	rmq_succinct_sct<> lrmq ( &tmp_llcp );
-	rmq_succinct_sct<> rrmq ( &tmp_rlcp );
+	right_compacted_trie ( f_mini_pos, forward_SA, forward_LCP, Nz, RSA, RLCP, g );
+	left_compacted_trie ( f_mini_pos, reverse_SA, reverse_LCP, Nz, LSA, LLCP, g );
 
+	delete[] forward_SA;
+	delete[] forward_LCP;
+	delete[] reverse_SA;
+	delete[] reverse_LCP;
 	string().swap(zstrs);
 	string().swap(rev_zstrs);	
+	unordered_set<int>().swap(f_mini_pos);
+		
+	vector<int> tmp_llcp(LLCP, LLCP+g+1);
+	vector<int> tmp_rlcp(RLCP, RLCP+g+1);	
+	rmq_succinct_sct<> lrmq ( &tmp_llcp );
+	rmq_succinct_sct<> rrmq ( &tmp_rlcp );
+	
 	vector<int>().swap(tmp_llcp);
-	vector<int>().swap(tmp_rlcp);
+	vector<int>().swap(tmp_rlcp);	
 
 	vector<pair<int  ,int  >> l;
 	vector<pair<int  ,int  >> r;
@@ -207,21 +216,20 @@ int main (int argc, char ** argv )
   	//constructing grid with bd-anchors
   	grid construct;
   	construct.build( points, 0 );
-
-	cout << "grid index constructed" << endl;
   	
-	vector<pair<int  ,int  >>().swap(l);
-	vector<pair<int  ,int  >>().swap(r);
+	vector<pair<int,int>>().swap(l);
+	vector<pair<int,int>>().swap(r);
 	vector<point>().swap(points);
-	
+
+		
 	mi = mallinfo2();
 	
 	double end_ram = mi.hblkhd + mi.uordblks;
 	auto end = get_time::now();
 	auto diff2 = end - begin;
+	
 	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
 	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
-	
 
 	if(!st.patterns.empty()){
 		string pfile = st.patterns;
@@ -233,15 +241,14 @@ int main (int argc, char ** argv )
 		begin = get_time::now();
 		for (string pattern; getline(patterns, pattern); ){
 			if(pattern.size() < k) continue;
-	//			output_file << pattern << ":"; 
+			// output_file << pattern << ":"; 
 			size_t j = find_minimizer_index(pattern, k);
 			string left_pattern = pattern.substr(0, j+1);
 			reverse(left_pattern.begin(), left_pattern.end());
 			pair<int64_t ,int64_t> left_interval = rev_pattern_matching ( left_pattern, fH, LSA, LLCP, lrmq, (int64_t)g ); 
-
+			vector<int> LSA_interval;
 			string right_pattern = pattern.substr(j);
 			pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g ); 
-			
 			if ( left_interval.first <= left_interval.second  && right_interval.first <= right_interval.second )
 			{
 			
@@ -257,15 +264,16 @@ int main (int argc, char ** argv )
 			
 				set<int64_t> valid_res;
 				for(size_t i = 0; i < result.size(); i++){
-					if(is_valid(text, alphabet, pattern, (RSA[result.at(i)-1]-j), z)){
+					if(valid_res.count(RSA[result.at(i)-1]-j)%N) continue;
+//					if(is_valid(text, alphabet, pattern, (RSA[result.at(i)-1]-j), z)){
+					if(fH.get_pi(RSA[result.at(i)-1], RSA[result.at(i)-1]-j, pattern.size() ) * z >= 1){
 						valid_res.insert((RSA[result.at(i)-1]-j)%N);
 					}
 				}
-				// for(auto i : valid_res)
-					// output_file<< i << " ";
-				
+					// for(auto i : valid_res)
+						// output_file<< i << " ";				
 			}
-//			output_file << endl;	
+				// output_file << endl;	
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
