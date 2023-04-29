@@ -59,11 +59,19 @@ pair<int64_t ,int64_t > pattern_matching ( string & w, HeavyString & a, int  * S
 
 		/* lcp(i,f) */
 		int64_t  lcpif;
-		lcpif = LCP[rmq(i+1, f)];
+		if( f == n){
+			lcpif = 0;
+		}else{
+			lcpif = LCP[rmq(i+1, f)];
+		}
 		
 		/* lcp(d,i) */
 		int64_t  lcpdi; 
-		lcpdi = LCP[rmq(d+1, i)];
+		if( i == n ){
+			lcpdi = 0;
+		}else{
+			lcpdi = LCP[rmq(d+1, i)];
+		}
 
 		if ( ( ld <= lcpif ) && ( lcpif < lf ) )
 		{
@@ -182,11 +190,19 @@ pair<int64_t ,int64_t > rev_pattern_matching ( string & w, HeavyString & a, int 
 
 		/* lcp(i,f) */
 		int64_t  lcpif;
-		lcpif = LCP[rmq(i+1, f)];
+		if( f == n ){
+			lcpif = 0;
+		}else{
+			lcpif = LCP[rmq(i+1, f)];
+		}
 		
 		/* lcp(d,i) */
 		int64_t  lcpdi;
-		lcpdi = LCP[rmq(d+1, i)];
+		if( i == n ){
+			lcpdi = 0;
+		}else{
+			lcpdi = LCP[rmq(d+1, i)];
+		}
 
 		//std::cout << revSA << " " << i << " " << d << " " << f << " " << ld << " " << lf << " " << lcpdi << " " << lcpif << std::endl;
 		if ( ( ld <= lcpif ) && ( lcpif < lf ) )

@@ -57,32 +57,23 @@ class HeavyString{
 			H+=(A[which_max]);
 			double pi = log2(P[i][which_max]);
 			pi_arr.push_back(pi);
-		}
-		
+		}		
 		
 		pi_suf.assign(pi_arr.begin(), pi_arr.end());
 		for(int i = n-2; i >= 0; i--){
 			pi_suf[i] += pi_suf[i+1];
 		}
-		for(size_t i = 0; i < N; i++){
-			if(S[i] != H[i%n]){
-				if (A.find(S[i]) == std::string::npos) {
-					throw std::invalid_argument("S contains a character not in A.");
-				}
-				_alt[i] = S[i];
-			}
-		}
+
 		for(int m : min_pos){
 			int begin = m - le[m];
 			int end = m + re[m] + 1;
-		//	std::cout << m << " " << begin << " " << end << std::endl;
 			for(int i = begin; i < end; i++){
 				int h = i%n;
 				if(H[h] != S[i]){
 					double this_pi = log2(P[h][A.find(S[i])]);
-					//_alt[i] = S[i];
+					_alt[i] = S[i];
 					alt_pos[m].push_back(i);
-					delta_pi[i] =  this_pi - pi_arr[i];
+					delta_pi[i] =  this_pi - pi_arr[h];
 				}
 			}
 		}

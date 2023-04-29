@@ -82,5 +82,6 @@ public:
 	pair<int,int> SAoccurrences(string const& s) const;
 	void clean();
 	std::vector<int> toSA();
+	double get_pi(int i, int begin, int length);
     ~PropertySuffixTree();
 };

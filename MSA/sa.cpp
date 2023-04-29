@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_set>
+#include <unordered_map>
+#include <deque>
 #include <boost/functional/hash.hpp>
 
 #include "defs.h"
@@ -145,4 +147,68 @@ int  LCParray ( unsigned char * text, size_t n, int  * SA, int  * ISA, int  * LC
                 }
 
         return ( 1 );
+}
+
+void extention ( vector<vector<double>>& text, string& s, string& alph, vector<int>& le, vector<int>& re, double z ){
+	int n = text.size();
+	int N = s.size();
+	unordered_map<char, int> A;
+	for(int i = 0; i < alph.size(); i++){
+		A[alph[i]] = i;
+	}
+	
+	vector<double> _pi;
+	for(int i = 0; i < N; i++){
+		_pi.push_back( text[i%n][A[s[i]]]);
+	}	
+
+	re.assign(N,0);	
+	for (auto j = 0; j < z; j++ ){
+		int i = 0;
+		int si = i + j*n;
+		int l = 0;
+		double cum_pi = _pi[si];
+		while( (cum_pi * z >= 1) && (i+l < n) ){
+			l++;
+			cum_pi *= _pi[si+l];
+		}
+		re[si] = l-1;
+		
+		for(i = 1; i < n; i++){
+			si++;
+			l--;
+			cum_pi /= _pi[si-1];
+			while( (cum_pi * z >= 1) && (i+l < n) ){
+				l++;
+				cum_pi *= _pi[si+l];
+			}
+			re[si] = l-1;
+		}		
+	}
+	
+	le.assign(N,0);
+	reverse(_pi.begin(), _pi.end());
+	for (auto j = 0; j < z; j++ ){
+		int i = 0;
+		int si = i + j*n;
+		int l = 0;
+		double cum_pi = _pi[si];
+		while( (cum_pi * z >= 1) && (i+l < n) ){
+			l++;
+			cum_pi *= _pi[si+l];
+		}
+		le[si] = l-1<0 ? 0 : l-1;
+		
+		for(i = 1; i < n; i++){
+			si++;
+			if(l > 0) l--;
+			cum_pi /= _pi[si-1];
+			while( (cum_pi * z >= 1) && (i+l < n) ){
+				l++;
+				cum_pi *= _pi[si+l];
+			}
+			le[si] = l-1<0 ? 0 : l-1;
+		}		
+	}
+	reverse(le.begin(), le.end());
 }

@@ -208,16 +208,14 @@ void PropertySuffixTree::build_suffix_tree() {
 void PropertySuffixTree::process_property(const vector<int>& pi, std::vector<int> const& pos) {
     vector<pair<Locus, int>> requests;
     Locus cur = Locus(root, text.begin(), text.begin());
-//    for (size_t i = 0; i < text.length(); ++i) {
 	for(size_t j = 0; j < pos.size(); ++j){
 		size_t i = pos[j];
 		cur.node = root;
 		cur.begin = text.begin() + i;
-        cur.end = text.begin() + i + pi[i];
+        cur.end = text.begin() + i + pi[i]+1;
         cur.fast_forward();
         requests.emplace_back(make_pair(cur, i));
         //cur.node = cur.node->suf_link;
-		
     }
     sort(requests.begin(), requests.end());
     for (auto const &r : requests) {
@@ -230,7 +228,8 @@ void PropertySuffixTree::process_property(const vector<int>& pi, std::vector<int
     root->trim(true);
 }
 
-PropertySuffixTree::PropertySuffixTree(vector<int> const& S, HeavyString const& H, std::vector<int> const& pos): text(H) {
+PropertySuffixTree::PropertySuffixTree(vector<int> const& S, HeavyString const& H, std::vector<int> const& pos) {
+	text = H;
     build_suffix_tree();
     process_property(S,pos);
 }
@@ -343,4 +342,8 @@ std::vector<int> PropertySuffixTree::toSA(){
 	}		
 
 	return SA;
+}
+
+double PropertySuffixTree::get_pi(int i, int begin, int length){
+	return text.get_pi(i, begin, length);
 }

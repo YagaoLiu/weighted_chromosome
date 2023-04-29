@@ -51,19 +51,19 @@ bool sort_sa(const pair<int,int> &a,const pair<int,int> &b)
        return a.first<b.first;
 }
 
-// bool is_valid(vector<vector<double>>& text, string& alph, string& p, int   pos, double z){
-		// unordered_map<char, int> mapping;
-		// pos = pos%(text.size());
-		// if(pos + p.size() > text.size()) return false;
-		// for(int i = 0; i < alph.size(); i++){
-			// mapping[alph[i]] = i;
-		// }
-		// double cum_prob = 1;
-		// for(int i = 0; i < p.size(); i++){
-			// cum_prob *= text[pos+i][mapping[p[i]]];
-		// }
-		// return (cum_prob*z >= 1)?true:false;
-// }
+bool is_valid(vector<vector<double>>& text, string& alph, string& p, int   pos, double z){
+		unordered_map<char, int> mapping;
+		pos = pos%(text.size());
+		if(pos + p.size() > text.size()) return false;
+		for(int i = 0; i < alph.size(); i++){
+			mapping[alph[i]] = i;
+		}
+		double cum_prob = 1;
+		for(int i = 0; i < p.size(); i++){
+			cum_prob *= text[pos+i][mapping[p[i]]];
+		}
+		return (cum_prob*z >= 1)?true:false;
+}
 
 int main (int argc, char ** argv )
 {
@@ -127,6 +127,7 @@ int main (int argc, char ** argv )
 	int   g = f_mini_pos.size();
 	
 	string rev_zstrs(zstrs.rbegin(), zstrs.rend());
+	
 	vector<int> le;
 	vector<int> re;
 	extention(text, zstrs, alphabet, le, re, z);
@@ -160,7 +161,6 @@ int main (int argc, char ** argv )
 	}
 	LCParray( seq, Nz, reverse_SA, iSA, reverse_LCP );
 	
-
 	delete[] iSA;
 
 	int   * RSA	 = new int   [g];
@@ -178,14 +178,14 @@ int main (int argc, char ** argv )
 	string().swap(zstrs);
 	string().swap(rev_zstrs);	
 	unordered_set<int>().swap(f_mini_pos);
-		
-	vector<int> tmp_llcp(LLCP, LLCP+g+1);
-	vector<int> tmp_rlcp(RLCP, RLCP+g+1);	
+	
+	vector<int> tmp_llcp(LLCP, LLCP+g);
+	vector<int> tmp_rlcp(RLCP, RLCP+g);	
 	rmq_succinct_sct<> lrmq ( &tmp_llcp );
 	rmq_succinct_sct<> rrmq ( &tmp_rlcp );
-	
+
 	vector<int>().swap(tmp_llcp);
-	vector<int>().swap(tmp_rlcp);	
+	vector<int>().swap(tmp_rlcp);
 
 	vector<pair<int  ,int  >> l;
 	vector<pair<int  ,int  >> r;
@@ -231,6 +231,7 @@ int main (int argc, char ** argv )
 	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
 	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
 
+	size_t total_occ_no = 0;
 	if(!st.patterns.empty()){
 		string pfile = st.patterns;
 
@@ -246,7 +247,7 @@ int main (int argc, char ** argv )
 			string left_pattern = pattern.substr(0, j+1);
 			reverse(left_pattern.begin(), left_pattern.end());
 			pair<int64_t ,int64_t> left_interval = rev_pattern_matching ( left_pattern, fH, LSA, LLCP, lrmq, (int64_t)g ); 
-			vector<int> LSA_interval;
+
 			string right_pattern = pattern.substr(j);
 			pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g ); 
 			if ( left_interval.first <= left_interval.second  && right_interval.first <= right_interval.second )
@@ -265,11 +266,11 @@ int main (int argc, char ** argv )
 				set<int64_t> valid_res;
 				for(size_t i = 0; i < result.size(); i++){
 					if(valid_res.count(RSA[result.at(i)-1]-j)%N) continue;
-//					if(is_valid(text, alphabet, pattern, (RSA[result.at(i)-1]-j), z)){
 					if(fH.get_pi(RSA[result.at(i)-1], RSA[result.at(i)-1]-j, pattern.size() ) * z >= 1){
 						valid_res.insert((RSA[result.at(i)-1]-j)%N);
 					}
 				}
+				total_occ_no += valid_res.size();
 					// for(auto i : valid_res)
 						// output_file<< i << " ";				
 			}
@@ -277,7 +278,8 @@ int main (int argc, char ** argv )
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
-		output_file << pfile << " Search Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"ms "<<endl;
+		output_file << pfile << " Search Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"ms. \n Totally " << total_occ_no << " occurrences are found." << endl;
+
 	}
 
 	return 0;

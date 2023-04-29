@@ -53,31 +53,31 @@ int main (int argc, char ** argv ) {
 	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
 	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
 
-	if(!st.patterns.empty()){
-		
+	int total_occ = 0;
+	if(!st.patterns.empty()){		
 		begin = get_time::now();
-		string pfile = st.patterns;
-
-		ifstream file(pfile, std::ios_base::in | std::ios_base::binary);
+		
+		ifstream file(st.patterns, std::ios_base::in | std::ios_base::binary);
 		boost::iostreams::filtering_istream patterns;
 		patterns.push(boost::iostreams::gzip_decompressor());
 		patterns.push(file);	
 		begin = get_time::now();
 		for (string pattern; getline(patterns, pattern); ){
-			//output << pattern << ": ";
-			std::vector<int> occs = M.occurrences(pattern, ell, st.z);
+			// output_file << pattern << ": ";
+			std::vector<int> occs = M.occurrences(pattern, ell, st.z, output_file);
 			// if (occs.empty()) {
-				// output << "Not found\n";
+				// output_file << "Not found\n";
 			// } else {
 				// for (auto p : occs) {
-					// output << p << " ";
+					// output_file << p << " ";
 				// }
-				// output << endl;
+				// output_file << endl;
 			// }
+			total_occ += occs.size();
 		}
 		end = get_time::now();
 		auto diff = end - begin;
-		output_file << "Search Time:  " << chrono::duration_cast<chrono::milliseconds>(diff).count() << endl;
+		output_file << "Search Time:  " << chrono::duration_cast<chrono::milliseconds>(diff).count() << "ms. \n Totally " << total_occ << " occurrences are found." << endl;
 	}
 
 	

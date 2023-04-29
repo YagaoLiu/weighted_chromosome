@@ -51,20 +51,6 @@ bool sort_sa(const pair<int,int> &a,const pair<int,int> &b)
        return a.first<b.first;
 }
 
-bool is_valid(vector<vector<double>>& text, string& alph, string& p, int64_t   pos, double z){
-		unordered_map<char, int> mapping;
-		pos = pos%(text.size());
-		if(pos + p.size() > text.size()) return false;
-		for(int i = 0; i < alph.size(); i++){
-			mapping[alph[i]] = i;
-		}
-		double cum_prob = 1;
-		for(int i = 0; i < p.size(); i++){
-			cum_prob *= text[pos+i][mapping[p[i]]];
-		}
-		return (cum_prob*z >= 1)?true:false;
-}
-
 int main (int argc, char ** argv )
 {
     Settings st = decode_switches(argc, argv);
@@ -100,7 +86,7 @@ int main (int argc, char ** argv )
         text.emplace_back(symbol);
     }
 	
-	int k = ceil(3 + log2(ell) / log2(alphabet.size()));
+	int k = ceil(4 * log2(ell) / log2(alphabet.size()));
 	int w = ell - k + 1;
 
 	auto begin = get_time::now();
@@ -127,7 +113,16 @@ int main (int argc, char ** argv )
 	int   g = f_mini_pos.size();
 	string rev_zstrs(zstrs.rbegin(), zstrs.rend());
 
-	HeavyString fH(text, zstrs, alphabet);
+	vector<int> le;
+	vector<int> re;
+	extention(text, zstrs, alphabet, le, re, z);
+
+	HeavyString fH(text, zstrs, alphabet, f_mini_pos, le, re);
+				
+	fS.clear();
+	vector<vector<double>>().swap(text);
+	vector<int>().swap(le);
+	vector<int>().swap(re);
 
 	int   * fSA		= new int   [Nz];
 	int   * fLCP	= new int   [Nz];
@@ -150,9 +145,6 @@ int main (int argc, char ** argv )
 		iSA[rSA[i]] = i;
 	}
 	LCParray( seq, Nz, rSA, iSA, rLCP );
-	
-	fS.clear();
-
 	int   * RSA	 = new int   [g];
 	int   * RLCP = new int   [g];
 	int   * LSA	 = new int   [g];
@@ -186,7 +178,7 @@ int main (int argc, char ** argv )
 	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
 	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
 	
-
+	size_t total_occ_no = 0;
 	if(!st.patterns.empty()){
 		string pfile = st.patterns;
 
@@ -197,36 +189,52 @@ int main (int argc, char ** argv )
 		begin = get_time::now();
 		for (string pattern; getline(patterns, pattern); ){
 			if(pattern.size() < k) continue;
-	//			output_file << pattern << ":"; 
+			set<int64_t> valid_res;
+			// output_file << pattern << ":"; 
 			size_t j = find_minimizer_index(pattern, k);
+			int l = j;
+			int r = pattern.size()-l;
 			if(j*2 > pattern.size()){
 				string left_pattern = pattern.substr(0, j+1);
 				reverse(left_pattern.begin(), left_pattern.end());
 				pair<int64_t ,int64_t> left_interval = rev_pattern_matching ( left_pattern, fH, LSA, LLCP, lrmq, (int64_t)g );
-				if( left_interval.first <= left_interval.second ){
-					set<int64_t> valid_res;
+				if( left_interval.first <= left_interval.second ){					
 					for(int64_t i = left_interval.first; i <= left_interval.second; i++){
-						if(is_valid(text, alphabet, pattern, (RSA[i]-j-1), z)){
-							valid_res.insert((RSA[i]-j-1)%N);
+						int begin = Nz - (LSA[i]+left_pattern.size());
+						if(valid_res.count(begin%N)) continue;
+						int c = Nz - LSA[i];
+						double lpi = fH.get_pi(c, begin, l);
+						double rpi = fH.check_pi(pattern, l, begin+l, r, c);
+						if( lpi * rpi * z >= 1 ){
+							valid_res.insert( begin%N );
 						}
 					}
 				}
+	
 			}else{		
 				string right_pattern = pattern.substr(j);
-				pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g ); 
+				pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g );
 				if( right_interval.first <= right_interval.second ){
-					set<int64_t> valid_res;
 					for(int64_t i = right_interval.first; i <= right_interval.second; i++){
-						if(is_valid(text, alphabet, pattern, (RSA[i]-j), z)){
-							valid_res.insert((RSA[i]-j)%N);
+						int begin = RSA[i] - l;
+						if(valid_res.count(begin%N)) continue;
+						double rpi = fH.get_pi( RSA[i], RSA[i], r);
+						double lpi = fH.check_pi(pattern, 0, begin, l,  RSA[i]);
+						if( rpi * lpi * z >= 1 ){
+							valid_res.insert( begin%N );
 						}
 					}
 				}
 			}
+			// for(auto occ : valid_res){
+				// output_file << occ << " ";
+			// }
+			// output_file << endl;
+			total_occ_no += valid_res.size();
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
-		output_file << pfile << " Search Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"ms "<<endl;
+		output_file << pfile << " Search Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"ms. \n Totally " << total_occ_no << " occurrences are found." << endl;
 	}
 
 	return 0;

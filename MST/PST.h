@@ -28,6 +28,7 @@ class PropertySuffixTree {
         unordered_map<char, stNode*> children;
         position begin, end; 
         vector<int> labels;
+		pair<int,int> SAinterval;
 		bool keeper = false;
         
         stNode(position const &begin, position const &end);
@@ -78,6 +79,10 @@ public:
 	int number_of_nodes();	
     bool contains(string const &s) const;
     vector<int> occurrences(string const &s) const;
+	pair<int,int> SAoccurrences(string const& s) const;
 	void clean();
+	std::vector<int> toSA();
+	double get_pi(int i, int begin, int length);
+	double naive_check(string const & pat, int p_begin, int t_begin, int length, int c);
     ~PropertySuffixTree();
 };

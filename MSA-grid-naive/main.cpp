@@ -127,17 +127,17 @@ int main (int argc, char ** argv )
 	int   g = f_mini_pos.size();
 	
 	string rev_zstrs(zstrs.rbegin(), zstrs.rend());
-	// vector<int> le;
-	// vector<int> re;
-	// extention(text, zstrs, alphabet, le, re, z);
+	vector<int> le;
+	vector<int> re;
+	extention(text, zstrs, alphabet, le, re, z);
 
-//	HeavyString fH(text, zstrs, alphabet, f_mini_pos, le, re);
-	HeavyString fH(text, zstrs, alphabet);
+	HeavyString fH(text, zstrs, alphabet, f_mini_pos, le, re);
+	// HeavyString fH(text, zstrs, alphabet);
 	
 	fS.clear();
 	// vector<vector<double>>().swap(text);
-	// vector<int>().swap(le);
-	// vector<int>().swap(re);
+	vector<int>().swap(le);
+	vector<int>().swap(re);
 	
 	int   * forward_SA		= new int   [Nz];
 	int   * forward_LCP	= new int   [Nz];
@@ -161,13 +161,12 @@ int main (int argc, char ** argv )
 	}
 	LCParray( seq, Nz, reverse_SA, iSA, reverse_LCP );
 	
-
 	delete[] iSA;
 
 	int   * RSA	 = new int   [g];
-	int   * RLCP = new int   [g];
+	int   * RLCP = new int   [g+1];
 	int   * LSA	 = new int   [g];
-	int   * LLCP = new int   [g];
+	int   * LLCP = new int   [g+1];
 	
 	right_compacted_trie ( f_mini_pos, forward_SA, forward_LCP, Nz, RSA, RLCP, g );
 	left_compacted_trie ( f_mini_pos, reverse_SA, reverse_LCP, Nz, LSA, LLCP, g );
@@ -179,14 +178,16 @@ int main (int argc, char ** argv )
 	string().swap(zstrs);
 	string().swap(rev_zstrs);	
 	unordered_set<int>().swap(f_mini_pos);
-		
+	
+	RLCP[g] = numeric_limits<int>::max();
+	LLCP[g] = numeric_limits<int>::max();
 	vector<int> tmp_llcp(LLCP, LLCP+g+1);
 	vector<int> tmp_rlcp(RLCP, RLCP+g+1);	
 	rmq_succinct_sct<> lrmq ( &tmp_llcp );
 	rmq_succinct_sct<> rrmq ( &tmp_rlcp );
-	
+
 	vector<int>().swap(tmp_llcp);
-	vector<int>().swap(tmp_rlcp);	
+	vector<int>().swap(tmp_rlcp);
 
 	vector<pair<int  ,int  >> l;
 	vector<pair<int  ,int  >> r;
@@ -232,6 +233,7 @@ int main (int argc, char ** argv )
 	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
 	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
 
+	size_t total_occ_no = 0;
 	if(!st.patterns.empty()){
 		string pfile = st.patterns;
 
@@ -247,12 +249,7 @@ int main (int argc, char ** argv )
 			string left_pattern = pattern.substr(0, j+1);
 			reverse(left_pattern.begin(), left_pattern.end());
 			pair<int64_t ,int64_t> left_interval = rev_pattern_matching ( left_pattern, fH, LSA, LLCP, lrmq, (int64_t)g ); 
-			// if(pattern == "ATGGTTATGCACTCAACTACTAACGCGTGACG"){
-				// cout << pattern << endl;
-				// cout << left_interval.first << " " << left_interval.second << endl;
-				// for(auto i = left_interval.first; i < left_interval.second
-				// return 0;
-			// }
+
 			string right_pattern = pattern.substr(j);
 			pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g ); 
 			if ( left_interval.first <= left_interval.second  && right_interval.first <= right_interval.second )
@@ -276,6 +273,7 @@ int main (int argc, char ** argv )
 						valid_res.insert((RSA[result.at(i)-1]-j)%N);
 					}
 				}
+				total_occ_no += valid_res.size();
 					// for(auto i : valid_res)
 						// output_file<< i << " ";				
 			}
@@ -283,7 +281,8 @@ int main (int argc, char ** argv )
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
-		output_file << pfile << " Search Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"ms "<<endl;
+		output_file << pfile << " Search Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"ms. \n Totally " << total_occ_no << " occurrences are found." << endl;
+
 	}
 
 	return 0;

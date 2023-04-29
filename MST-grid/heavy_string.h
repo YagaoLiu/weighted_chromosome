@@ -2,20 +2,26 @@
 #define HEAVY_STRING_H
 
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <string>
 #include <algorithm>
 #include <cstddef>
-#include <stdexcept>
+#include <cmath>
+#include <stdexcept> 
 #include <iostream>
 
 class HeavyString{
 	std::string H;
 	std::unordered_map<size_t, char> _alt;
+	std::unordered_map<int, double> delta_pi;
+	std::unordered_map<int, std::vector<int>> alt_pos;
+	std::vector<double> pi_suf;
 	size_t n;
 	size_t N;
 
 	public:
+	HeavyString(){};
 	HeavyString(std::vector<std::vector<double>>& P, std::string const& S, std::string& A) 
 		: n(P.size()), N(S.size()) {
 			if (n == 0 || N == 0) {
@@ -39,6 +45,46 @@ class HeavyString{
 	HeavyString(std::string const& S): n(S.size()), N(S.size()){
 			H = S;
 	}
+	
+	HeavyString(std::vector<std::vector<double>>& P,  std::string const& S, std::string& A, std::vector<int> min_pos, std::vector<int> le, std::vector<int> re, bool create_pi){
+		n = P.size();
+		N = S.size();
+		if (n == 0 || N == 0) {
+			throw std::invalid_argument("P and S cannot be empty.");
+		}
+		
+		std::vector<double> pi_arr;
+		
+		for(size_t i = 0; i < n; i++){
+			int which_max = max_element(P[i].begin(), P[i].end()) - P[i].begin();
+			H+=(A[which_max]);
+			double pi = log2(P[i][which_max]);
+			pi_arr.push_back(pi);
+		}		
+		
+		if(create_pi){				
+			pi_suf.assign(pi_arr.begin(), pi_arr.end());
+			for(int i = n-2; i >= 0; i--){
+				pi_suf[i] += pi_suf[i+1];
+			}
+		}
+		
+		for(int m : min_pos){
+			int begin = m - le[m];
+			int end = m + re[m] + 1;
+			for(int i = begin; i < end; i++){
+				int h = i%n;
+				if(H[h] != S[i]){
+					_alt[i] = S[i];					
+					if(create_pi){
+						alt_pos[m].push_back(i);
+						double this_pi = log2(P[h][A.find(S[i])]);					
+						delta_pi[i] =  this_pi - pi_arr[h];
+					}
+				}
+			}
+		}
+	}
 
 	HeavyString(const HeavyString& other): H(other.H), _alt(other._alt), n(other.n), N(other.N) {}
 
@@ -47,8 +93,13 @@ class HeavyString{
 			H = other.H;
 			n = other.n;
 			N = other.N;
-			std::unordered_map<size_t, char> temp(other._alt);
-			std::swap(_alt, temp);
+			pi_suf.assign(other.pi_suf.begin(), other.pi_suf.end());
+			std::unordered_map<size_t, char>temp1(other._alt);
+			std::unordered_map<int, double>temp2(other.delta_pi);
+			std::unordered_map<int, std::vector<int>> temp3(other.alt_pos);
+			std::swap(_alt, temp1);
+			std::swap(delta_pi, temp2);
+			std::swap(alt_pos, temp3);
 		}
 		return *this;
 	}
@@ -79,7 +130,32 @@ class HeavyString{
 
 		return substring;
 	}
-
+	
+	double get_pi(int i, int begin, int length){
+		if(begin%n > i%n)
+			return 0;
+		if(begin%n + length > n)
+			return 0;
+				
+		int end = begin%n + length;
+		
+		double cum_pi = pi_suf[begin%n] - pi_suf[begin%n + length];
+		
+		std::vector<int>& v = alt_pos[i];
+		if(v.empty()){
+			return pow(2,cum_pi);
+		}else{
+			auto lower = std::lower_bound(v.begin(), v.end(), begin);
+			auto upper = std::upper_bound(v.begin(), v.end(), end);		
+			if(lower < upper){
+				for(auto it = lower; it != upper; it++){
+					cum_pi += delta_pi[*it];
+				}
+			}
+			return pow(2,cum_pi);
+		}
+	}
+	
 	size_t length() const {return N;}
 	size_t heavy_length() const {return n;}
 
