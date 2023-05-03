@@ -53,7 +53,8 @@ void right_compacted_trie ( unordered_set<int > &anchors, int  * SA, int  * LCP,
 				else
 					RLCP[ii] = std::min(minLCP, LCP[i]);	//otherwise, we should take the minimum in the range
 			}
-  			//cout<<"RSA[i]: "<< RSA[ii] <<" RLCP[i]: "<<RLCP[ii]<<"\n"; getchar();
+  			// cout<< i << "RSA[i]: "<< RSA[ii] <<" RLCP[i]: "<<RLCP[ii]<<"\n"; 
+			// getchar();
 			minLCP = n; // set this to something high to get the _FIRST_ next minimum value, because a new range STARTS
 			ii++;
 		}
@@ -172,17 +173,17 @@ void extention ( vector<vector<double>>& text, string& s, string& alph, vector<i
 			l++;
 			cum_pi *= _pi[si+l];
 		}
-		re[si] = l-1;
+		re[si] = l-1<0 ? 0 : l-1;
 		
 		for(i = 1; i < n; i++){
 			si++;
-			l--;
+			if(l > 0) l--;
 			cum_pi /= _pi[si-1];
 			while( (cum_pi * z >= 1) && (i+l < n) ){
 				l++;
 				cum_pi *= _pi[si+l];
 			}
-			re[si] = l-1;
+			re[si] = l-1<0 ? 0 : l-1;
 		}		
 	}
 	

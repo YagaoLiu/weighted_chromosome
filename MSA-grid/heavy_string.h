@@ -16,6 +16,7 @@ class HeavyString{
 	std::unordered_map<int, char> _alt;
 	std::unordered_map<int, double> delta_pi;
 	std::unordered_map<int, std::vector<int>> alt_pos;
+	std::unordered_map<int, std::pair<int, int>> alt_ext;
 	std::vector<double> pi_suf;
 	int n;
 	int N;
@@ -43,7 +44,7 @@ class HeavyString{
 			}
 		}	
 		
-	HeavyString(std::vector<std::vector<double>>& P,  std::string const& S, std::string& A, std::unordered_set<int> min_pos, std::vector<int> le, std::vector<int> re){
+	HeavyString(std::vector<std::vector<double>>& P,  std::string const& S, std::string& A, std::unordered_set<int> min_pos, std::vector<int> le, std::vector<int> re, bool create_pi){
 		n = P.size();
 		N = S.size();
 		if (n == 0 || N == 0) {
@@ -59,14 +60,18 @@ class HeavyString{
 			pi_arr.push_back(pi);
 		}		
 		
-		pi_suf.assign(pi_arr.begin(), pi_arr.end());
-		for(int i = n-2; i >= 0; i--){
-			pi_suf[i] += pi_suf[i+1];
+		if(create_pi){				
+			pi_suf.assign(pi_arr.begin(), pi_arr.end());
+			for(int i = n-2; i >= 0; i--){
+				pi_suf[i] += pi_suf[i+1];
+			}
 		}
-
+		
 		for(int m : min_pos){
 			int begin = m - le[m];
 			int end = m + re[m] + 1;
+			alt_ext[m].first = le[m];
+			alt_ext[m].second = re[m];
 			for(int i = begin; i < end; i++){
 				int h = i%n;
 				if(H[h] != S[i]){
@@ -93,6 +98,18 @@ class HeavyString{
 	}
 
 	char& operator[](size_t i){ 
+		if (i >= N) {
+			throw std::out_of_range("Index out of range.");
+		}
+
+		if(_alt.count(i)){
+			return _alt.at(i);
+		}else{
+			return H[i%n];
+		}
+	}
+	
+	char& at(size_t i){ 
 		if (i >= N) {
 			throw std::out_of_range("Index out of range.");
 		}
@@ -136,32 +153,47 @@ class HeavyString{
 	}
 	
 	double get_pi(int i, int begin, int length){
-		if(begin%n > i%n)
-			return 0;
-		if(begin%n + length > n)
-			return 0;
+		if(begin%n > i%n)			return 0;
+		if(begin%n + length > n)	return 0;
+		if( i - alt_ext[i].first > begin ) return 0;
+		if( i + alt_ext[i].second < begin + length - 1 ) return 0;
 		
+		int end = begin + length;
 		
-		int end = begin%n + length;
-		
-		double cum_pi = pi_suf[begin%n] - pi_suf[begin%n + length];
-		
+		double cum_pi = pi_suf[begin%n] - pi_suf[end%n];
 		std::vector<int>& v = alt_pos[i];
 		if(v.empty()){
 			return pow(2,cum_pi);
 		}else{
-			auto lower = std::lower_bound(v.begin(), v.end(), begin);
-			auto upper = std::upper_bound(v.begin(), v.end(), end);		
-			
-			if(lower < upper){
-				for(auto it = lower; it != upper; it++){
-					cum_pi += delta_pi[*it];
+			for(auto j : v){
+				if(j >= begin && j < end){					
+					cum_pi += delta_pi[j];
 				}
 			}
+
 			return pow(2,cum_pi);
 		}
 	}
-
+	
+	double check_pi(std::string& pat, size_t pat_begin, size_t txt_begin, size_t length, size_t min_pos){
+		// if(pat_begin + length >= pat.size()) return 0;
+		// if(txt_begin + length >= N) return 0;
+		for(auto i = 0; i < length; i++){
+			if(pat[pat_begin + i] != this->at(txt_begin+i)){
+				return 0;
+			}
+		}
+		return this->get_pi(min_pos,txt_begin, length);
+	}
+	
+	size_t le(size_t i){
+		return alt_ext[i].first;
+	}
+	
+	size_t re(size_t i){
+		return alt_ext[i].second;
+	}
+	
 	size_t length() const {return N;}
 	size_t size() const {return N;}
 	size_t heavy_length() const {return n;}

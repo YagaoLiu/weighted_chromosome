@@ -93,7 +93,7 @@ int main (int argc, char ** argv )
 	cout << "index begin" << endl;
 	Estimation fS(text, alphabet, z);
 	string zstrs;
-	unordered_set<int> f_mini_pos;
+	vector<int> mini_pos;
 	
 	int  ii = 0;
 	for(PropertyString const & s : fS.strings()){
@@ -103,21 +103,24 @@ int main (int argc, char ** argv )
 		minimizers_with_kr(s.string(), M,w, k);
 		for(auto it : M){
 			if(s._pi[it] >= k){
-				f_mini_pos.emplace(it + ii*N);
+				mini_pos.push_back(it + ii*N);
 			}
 		}
 		ii++;
 	}
-	
+
 	int   Nz = zstrs.size();
-	int   g = f_mini_pos.size();
 	string rev_zstrs(zstrs.rbegin(), zstrs.rend());
 
 	vector<int> le;
 	vector<int> re;
 	extention(text, zstrs, alphabet, le, re, z);
-
-	HeavyString fH(text, zstrs, alphabet, f_mini_pos, le, re);
+	
+	mini_pos.erase(remove_if(mini_pos.begin(), mini_pos.end(), [&](int i) { return re[i] < k; }), mini_pos.end());
+	unordered_set<int> f_mini_pos(mini_pos.begin(), mini_pos.end());
+	int g = f_mini_pos.size();
+	
+	HeavyString fH(text, zstrs, alphabet, f_mini_pos, le, re, true);
 				
 	fS.clear();
 	vector<vector<double>>().swap(text);
@@ -137,7 +140,7 @@ int main (int argc, char ** argv )
 		iSA[fSA[i]] = i;
 	}
 	LCParray( seq, Nz, fSA, iSA, fLCP );
-	
+
 	seq = (unsigned char *)rev_zstrs.c_str();
 	divsufsort( seq, rSA,  Nz );
 	
@@ -178,8 +181,9 @@ int main (int argc, char ** argv )
 	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
 	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
 	
-	size_t total_occ_no = 0;
 	if(!st.patterns.empty()){
+		size_t total_occ_no = 0;
+		cout << "pattern matching begin" << endl;
 		string pfile = st.patterns;
 
 		ifstream file(pfile, std::ios_base::in | std::ios_base::binary);
@@ -201,23 +205,27 @@ int main (int argc, char ** argv )
 				if( left_interval.first <= left_interval.second ){					
 					for(int64_t i = left_interval.first; i <= left_interval.second; i++){
 						int begin = Nz - (LSA[i]+left_pattern.size());
-						if(valid_res.count(begin%N)) continue;
-						int c = Nz - LSA[i];
+						if(begin < 0 || begin + pattern.size() >= Nz) continue;
+						if(valid_res.count(begin%N)) continue;						
+						int c = Nz - LSA[i] - 1;
 						double lpi = fH.get_pi(c, begin, l);
-						double rpi = fH.check_pi(pattern, l, begin+l, r, c);
+						double rpi = fH.check_pi(pattern, l, begin+l, r, c);	
+						
 						if( lpi * rpi * z >= 1 ){
 							valid_res.insert( begin%N );
 						}
 					}
 				}
 	
-			}else{		
+			}else{
 				string right_pattern = pattern.substr(j);
 				pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g );
 				if( right_interval.first <= right_interval.second ){
 					for(int64_t i = right_interval.first; i <= right_interval.second; i++){
-						int begin = RSA[i] - l;
+						int begin = RSA[i] - l;						
+						if(begin < 0 || begin + pattern.size() >= Nz) continue;
 						if(valid_res.count(begin%N)) continue;
+						
 						double rpi = fH.get_pi( RSA[i], RSA[i], r);
 						double lpi = fH.check_pi(pattern, 0, begin, l,  RSA[i]);
 						if( rpi * lpi * z >= 1 ){
