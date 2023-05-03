@@ -53,20 +53,19 @@ int main (int argc, char ** argv ) {
 	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
 	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
 
-	int total_occ = 0;
 	if(!st.patterns.empty()){		
-		begin = get_time::now();
-		
+		int total_occ = 0;
+		begin = get_time::now();		
 		ifstream file(st.patterns, std::ios_base::in | std::ios_base::binary);
 		boost::iostreams::filtering_istream patterns;
 		patterns.push(boost::iostreams::gzip_decompressor());
 		patterns.push(file);	
 		begin = get_time::now();
 		for (string pattern; getline(patterns, pattern); ){
-			// output_file << pattern << ": ";
+			// output_file << pattern << ":";
 			std::vector<int> occs = M.occurrences(pattern, ell, st.z, output_file);
 			// if (occs.empty()) {
-				// output_file << "Not found\n";
+				// output_file << "\n";
 			// } else {
 				// for (auto p : occs) {
 					// output_file << p << " ";

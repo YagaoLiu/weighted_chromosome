@@ -63,7 +63,6 @@ class PropertySuffixTree {
     
         
     stNode* root;
-    HeavyString text;
     Locus find(HeavyString &P) const;
     
     void build_suffix_tree();
@@ -71,6 +70,8 @@ class PropertySuffixTree {
     friend std::ostream& operator<< (std::ostream &out, PropertySuffixTree const &st);
     
 public:
+    HeavyString text;
+
    PropertySuffixTree(vector<int> const& S, HeavyString const& H, std::vector<int> const& pos);
 //    PropertySuffixTree(HeavyString const& H);
 

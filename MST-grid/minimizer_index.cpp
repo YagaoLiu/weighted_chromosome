@@ -13,9 +13,13 @@
 #include "minimizer_index.h"
 #include <unordered_map>
 
+typedef grid_point point;
+typedef grid_query query;
+
 using std::endl;
 using std::cerr;
 using get_time = std::chrono::steady_clock;
+
 
 bool sort_sa(const pair<int,int> &a,const pair<int,int> &b)
 {
@@ -42,49 +46,6 @@ std::istream & operator >> (std::istream& input, MinimizerIndex &M) {
  	return input;
 }
 
-void property_computer(vector<vector<double>>& matrix, string& text, string& A, vector<int>& _pi, double z){
-	int n = matrix.size();
-	int R = text.size() / n;
-	unordered_map<char, int> a;
-	for(size_t i = 0; i < A.size(); i++){
-		a[A[i]] = i;
-	}
-	
-	for(int r = 0; r < R; r++){
-		double product = 1.0;
-		deque<double> q;
-		vector<int> _p(n,0);
-		string subtext = text.substr(r*n,n);
-		for(int i = 0; i < n; i++){
-			if(i == 0){
-				int j = i;				
-				while(  (j < n) && (product * matrix[j][a[subtext[j]]] * z >= 1) ){
-					product *= matrix[j][a[subtext[j]]];
-					q.push_back(matrix[j][a[subtext[j]]]);
-					j++;
-				}
-				_p[i] = q.size();
-			}else if(i+q.size() > n){
-				_p[i] = _p[i-1] - 1;
-			}else{
-				if(!q.empty()){
-					double last = q.front();
-					product /= last;
-					q.pop_front();
-				}
-				int j = i + q.size();
-				while(  (j < n) && (product * matrix[j][a[subtext[j]]] * z >= 1) ){
-					product *= matrix[j][a[subtext[j]]];
-					q.push_back(matrix[j][a[subtext[j]]]);
-					j++;
-				}
-				_p[i] = q.size();			
-			}
-		}
-		_pi.insert(_pi.end(), _p.begin(), _p.end());
-	}					
-}
-
 void extention ( vector<vector<double>>& text, string& s, string& alph, vector<int>& le, vector<int>& re, double z ){
 	int n = text.size();
 	int N = s.size();
@@ -108,17 +69,17 @@ void extention ( vector<vector<double>>& text, string& s, string& alph, vector<i
 			l++;
 			cum_pi *= _pi[si+l];
 		}
-		re[si] = l-1;
+		re[si] = l-1<0 ? 0 : l-1;
 		
 		for(i = 1; i < n; i++){
 			si++;
-			l--;
+			if(l > 0) l--;
 			cum_pi /= _pi[si-1];
 			while( (cum_pi * z >= 1) && (i+l < n) ){
 				l++;
 				cum_pi *= _pi[si+l];
 			}
-			re[si] = l-1;
+			re[si] = l-1<0 ? 0 : l-1;
 		}		
 	}
 	
@@ -172,29 +133,29 @@ void MinimizerIndex::build_index(double z, int ell){
 	string rev_zstrs(zstrs.rbegin(), zstrs.rend());
 	vector<int> le;
 	vector<int> re;
-	for(auto i : f_mini_pos){
-		r_mini_pos.push_back(zstrs.size() - i);
-	}
-	// property_computer(fP, zstrs, alph, f_pi,z);
-	// property_computer(rP, rev_zstrs, alph, r_pi,z);
 	extention(fP, zstrs, alph, le, re, z);
 	vector<int> le_r(le.rbegin(), le.rend());
 	vector<int> re_r(re.rbegin(), re.rend());
+
+	f_mini_pos.erase(remove_if(f_mini_pos.begin(), f_mini_pos.end(), [&](int i) { return re[i] < k; }), f_mini_pos.end());
+
+	for(auto i : f_mini_pos){
+		r_mini_pos.push_back(zstrs.size() - i - 1);
+	}
 	
 	HeavyString fH(fP, zstrs, alph, f_mini_pos, le, re, true);
 	HeavyString rH(rP, rev_zstrs, alph, r_mini_pos, le_r, re_r, false);
 	Nz = zstrs.size();
+	int   g = f_mini_pos.size();
 	
-	forward_index = new PropertySuffixTree(re, fH,f_mini_pos);
-	
+	forward_index = new PropertySuffixTree(re, fH, f_mini_pos);	
 	reverse_index = new PropertySuffixTree(le_r, rH, r_mini_pos);
 	
 	RSA = forward_index->toSA();
 	vector<int> LSA = reverse_index->toSA();
-	
-	vector<pair<int,int>> l;
-	vector<pair<int,int>> r;
-	int g = RSA.size();
+		
+	vector<pair<int  ,int  >> l;
+	vector<pair<int  ,int  >> r;
 	for ( int   i = 0; i < g; i++ )
   	{
   		l.push_back( make_pair( Nz-1-LSA[i], i) );
@@ -204,23 +165,31 @@ void MinimizerIndex::build_index(double z, int ell){
  	sort(l.begin(),l.end(),sort_sa);
 	sort(r.begin(),r.end(),sort_sa);
 
-  	std::vector<grid_point> points;
+  	std::vector<point> points;
   	  	
-  	for ( int   i = 0; i < g; i++ ){ 
-		grid_point to_insert;
+  	for ( int   i = 0; i < g; i++ )
+  	{
+ 
+		point to_insert;
 		to_insert.row = l.at(i).second+1;
 		to_insert.col = r.at(i).second+1;
 		
 		to_insert.level = 0;
 		to_insert.label = l.at(i).first;
-		points.push_back(to_insert);
+		points.push_back(to_insert); 
+
   	}
-	
+  	  	
+  	//constructing grid with bd-anchors
   	construct.build( points, 0 );
-	
+
 	fS.clear();
 	fT.clear();	
 	vector<vector<double>>().swap(fP);
+	
+		int oc = zstrs.find("AGCTAGCTTCAAATAGTATTCTGCAGCCAGGC");
+	cout << oc << " " << oc%N <<endl;
+	cout << fH.substr(oc, 32) << endl;
 }
 
 int  find_minimizer_index(string s, int  k) {
@@ -280,16 +249,16 @@ std::vector<int> MinimizerIndex::GridMatch(std::string const& pattern, int ell, 
 	int k = ceil(4 * log2(ell) / log2(alph.size()));
 	std::string minimizer = pattern.substr(0,k);
 	int min_index = find_minimizer_index(pattern,k);
-	
 	std::set<int> occs;
-	std::string left_pattern = pattern.substr(0, min_index);
+	std::string left_pattern = pattern.substr(0, min_index+1);
 	reverse(left_pattern.begin(), left_pattern.end());
 	pair<int,int> left_interval = reverse_index->SAoccurrences(left_pattern);
 	string right_pattern = pattern.substr(min_index);
 	pair<int,int> right_interval = forward_index->SAoccurrences(right_pattern);
-	if ( left_interval.first <= left_interval.second  && right_interval.first <= right_interval.second ){
-			
-		//Finding rectangle containing bd-anchors in grid
+
+	if ( left_interval.first <= left_interval.second  && right_interval.first <= right_interval.second )
+	{	
+		// Finding rectangle containing bd-anchors in grid
 		grid_query rectangle;
 		rectangle.row1 = left_interval.first+1;
 		rectangle.row2 = left_interval.second+1;
@@ -298,13 +267,16 @@ std::vector<int> MinimizerIndex::GridMatch(std::string const& pattern, int ell, 
 		
 		vector<size_t> result;
 		construct.search_2d(rectangle, result);
+		
+		set<int64_t> valid_res;	
 		for(size_t i = 0; i < result.size(); i++){
+			if(RSA[result.at(i)-1] < min_index) continue;
 			if(occs.count((RSA[result.at(i)-1]-min_index)%N)) continue;
 			double pi = forward_index->get_pi(RSA[result.at(i)-1], RSA[result.at(i)-1]-min_index, pattern.size());
 			if(pi * z >= 1){
 				occs.insert((RSA[result.at(i)-1]-min_index)%N);
 			}
-		}				
+		}
 	}
 	std::vector<int> final_occs(occs.begin(), occs.end());
 	return final_occs;

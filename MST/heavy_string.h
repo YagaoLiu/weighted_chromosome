@@ -16,6 +16,7 @@ class HeavyString{
 	std::unordered_map<size_t, char> _alt;
 	std::unordered_map<int, double> delta_pi;
 	std::unordered_map<int, std::vector<int>> alt_pos;
+	std::unordered_map<int, std::pair<int, int>> alt_ext;
 	std::vector<double> pi_suf;
 	size_t n;
 	size_t N;
@@ -72,15 +73,15 @@ class HeavyString{
 		for(int m : min_pos){
 			int begin = m - le[m];
 			int end = m + re[m] + 1;
+			alt_ext[m].first = le[m];
+			alt_ext[m].second = re[m];
 			for(int i = begin; i < end; i++){
 				int h = i%n;
 				if(H[h] != S[i]){
-					_alt[i] = S[i];					
-					if(create_pi){
-						alt_pos[m].push_back(i);
-						double this_pi = log2(P[h][A.find(S[i])]);					
-						delta_pi[i] =  this_pi - pi_arr[h];
-					}
+					double this_pi = log2(P[h][A.find(S[i])]);
+					_alt[i] = S[i];
+					alt_pos[m].push_back(i);
+					delta_pi[i] =  this_pi - pi_arr[h];
 				}
 			}
 		}
@@ -97,9 +98,11 @@ class HeavyString{
 			std::unordered_map<size_t, char>temp1(other._alt);
 			std::unordered_map<int, double>temp2(other.delta_pi);
 			std::unordered_map<int, std::vector<int>> temp3(other.alt_pos);
+			std::unordered_map<int, std::pair<int, int>> temp4(other.alt_ext);
 			std::swap(_alt, temp1);
 			std::swap(delta_pi, temp2);
 			std::swap(alt_pos, temp3);
+			std::swap(alt_ext, temp4);
 		}
 		return *this;
 	}
@@ -144,24 +147,22 @@ class HeavyString{
 	}
 	
 	double get_pi(int i, int begin, int length){
-		if(begin%n > i%n)
-			return 0;
-		if(begin%n + length > n)
-			return 0;
+		if(begin%n > i%n)			return 0;
+		if(begin%n + length > n)	return 0;
+		if( i - alt_ext[i].first > begin ) return 0;
+		if( i + alt_ext[i].second < begin + length - 1 ) return 0;
 				
-		int end = begin%n + length;
+		int end = begin + length;
 		
-		double cum_pi = pi_suf[begin%n] - pi_suf[begin%n + length];
+		double cum_pi = pi_suf[begin%n] - pi_suf[end%n];
 		
 		std::vector<int>& v = alt_pos[i];
 		if(v.empty()){
 			return pow(2,cum_pi);
 		}else{
-			auto lower = std::lower_bound(v.begin(), v.end(), begin);
-			auto upper = std::upper_bound(v.begin(), v.end(), end);		
-			if(lower < upper){
-				for(auto it = lower; it != upper; it++){
-					cum_pi += delta_pi[*it];
+			for(auto j : v){
+				if(j >= begin && j < end){					
+					cum_pi += delta_pi[j];
 				}
 			}
 			return pow(2,cum_pi);

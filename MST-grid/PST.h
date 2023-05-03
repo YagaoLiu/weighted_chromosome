@@ -63,7 +63,6 @@ class PropertySuffixTree {
     
         
     stNode* root;
-    HeavyString text;
     Locus find(HeavyString &P) const;
     
     void build_suffix_tree();
@@ -75,7 +74,8 @@ public:
 //    PropertySuffixTree(HeavyString const& H);
 
     void minimizer_trim(vector<int> const& property, vector<int> const& pos);
-	
+	    HeavyString text;
+
 	int number_of_nodes();	
     bool contains(string const &s) const;
     vector<int> occurrences(string const &s) const;

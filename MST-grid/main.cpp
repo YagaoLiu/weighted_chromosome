@@ -53,8 +53,8 @@ int main (int argc, char ** argv ) {
 	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
 	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
 
-	int total_occ = 0;
 	if(!st.patterns.empty()){		
+		int total_occ = 0;
 		begin = get_time::now();
 		
 		ifstream file(st.patterns, std::ios_base::in | std::ios_base::binary);
@@ -63,10 +63,10 @@ int main (int argc, char ** argv ) {
 		patterns.push(file);	
 		begin = get_time::now();
 		for (string pattern; getline(patterns, pattern); ){
-			// output_file << pattern << ": ";
+			// output_file << pattern << ":";
 			std::vector<int> occs = M.GridMatch(pattern, ell, st.z);
 			// if (occs.empty()) {
-				// output_file << "Not found\n";
+				// output_file << "\n";
 			// } else {
 				// for (auto p : occs) {
 					// output_file << p << " ";

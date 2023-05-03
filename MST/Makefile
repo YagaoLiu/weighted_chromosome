@@ -2,7 +2,7 @@ MF=     Makefile
  
 CC=     g++
  
-CFLAGS= -g -Wall -Wextra -pedantic -fopenmp -msse4.2 -fomit-frame-pointer -funroll-loops 
+CFLAGS= -g -fopenmp -msse4.2 -fomit-frame-pointer -funroll-loops 
  
 LFLAGS= -std=c++14 -O3 -DNDEBUG -lboost_iostreams
 

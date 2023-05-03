@@ -27,8 +27,6 @@ PropertySuffixTree::stNode::stNode(PropertySuffixTree::position const &begin, Pr
 
 PropertySuffixTree::stNode::~stNode() {
     for (auto const &p : children) delete p.second;
-	vector<int>().swap(labels);
-	unordered_map<char, stNode*>().swap(children);
 }
 
 
@@ -212,7 +210,7 @@ void PropertySuffixTree::process_property(const vector<int>& pi, std::vector<int
 		size_t i = pos[j];
 		cur.node = root;
 		cur.begin = text.begin() + i;
-        cur.end = text.begin() + i + pi[i]+1;
+        cur.end = text.begin() + i + pi[i] + 1;
         cur.fast_forward();
         requests.emplace_back(make_pair(cur, i));
         //cur.node = cur.node->suf_link;
@@ -305,7 +303,6 @@ std::vector<int> PropertySuffixTree::toSA(){
 	Q.push(root);
 	vector<int> SA;
 	stack<stNode*> dfs_order;
-	
 	while(!Q.empty()){
 		cur = Q.top();
 		dfs_order.push(cur);
@@ -325,6 +322,7 @@ std::vector<int> PropertySuffixTree::toSA(){
 		}
 	}
 	
+	int max_right = 0;
 	while(!dfs_order.empty()){
 		cur = dfs_order.top();
 		dfs_order.pop();
@@ -339,8 +337,8 @@ std::vector<int> PropertySuffixTree::toSA(){
 			}
 		}
 		cur->SAinterval.second = right;
+		max_right = max(max_right, right);
 	}		
-
 	return SA;
 }
 
