@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <malloc.h>
 
-#include "defs.h"
+// #include "defs.h"
 #include "heavy_string.h"
 #include "input.h"
 #include "estimation.h"
@@ -97,15 +97,11 @@ int main (int argc, char ** argv )
 	
 	int  ii = 0;
 	for(PropertyString const & s : fS.strings()){
-		//fT += s;
 		zstrs += s.string();
 		std::vector<int> M;
 		minimizers_with_kr(s.string(), M,w, k);
-		for(auto it : M){
-			if(s._pi[it] >= k){
+		for(auto it : M)
 				mini_pos.push_back(it + ii*N);
-			}
-		}
 		ii++;
 	}
 
@@ -119,20 +115,18 @@ int main (int argc, char ** argv )
 	mini_pos.erase(remove_if(mini_pos.begin(), mini_pos.end(), [&](int i) { return re[i] < k; }), mini_pos.end());
 	unordered_set<int> f_mini_pos(mini_pos.begin(), mini_pos.end());
 	int g = f_mini_pos.size();
-	
+
 	HeavyString fH(text, zstrs, alphabet, f_mini_pos, le, re, true);
-				
+	
 	fS.clear();
 	vector<vector<double>>().swap(text);
-	vector<int>().swap(le);
-	vector<int>().swap(re);
+
 
 	int   * fSA		= new int   [Nz];
 	int   * fLCP	= new int   [Nz];
 	int   * rSA		= new int   [Nz];
 	int   * rLCP	= new int   [Nz];
 	
-	begin = get_time::now();
 	unsigned char * seq = (unsigned char *)zstrs.c_str();
 	divsufsort( seq, fSA,  Nz );
 	int  * iSA = new int   [Nz];
@@ -156,6 +150,10 @@ int main (int argc, char ** argv )
 	right_compacted_trie ( f_mini_pos, fSA, fLCP, Nz, RSA, RLCP, g );
 	left_compacted_trie ( f_mini_pos, rSA, rLCP, Nz, LSA, LLCP, g );
 
+	vector<int> le_r(le.rbegin(), le.rend());	
+	union_find_resort ( RSA, RLCP, re, g );
+	union_find_resort ( LSA, LLCP, le_r, g );
+
 	delete[] fSA;
 	delete[] fLCP;
 	delete[] rSA;
@@ -172,6 +170,8 @@ int main (int argc, char ** argv )
 	vector<int>().swap(tmp_llcp);
 	vector<int>().swap(tmp_rlcp);
 	unordered_set<int>().swap(f_mini_pos);
+	vector<int>().swap(le);
+	vector<int>().swap(re);
 
 	mi = mallinfo2();
 	
@@ -202,6 +202,7 @@ int main (int argc, char ** argv )
 				string left_pattern = pattern.substr(0, j+1);
 				reverse(left_pattern.begin(), left_pattern.end());
 				pair<int64_t ,int64_t> left_interval = rev_pattern_matching ( left_pattern, fH, LSA, LLCP, lrmq, (int64_t)g );
+
 				if( left_interval.first <= left_interval.second ){					
 					for(int64_t i = left_interval.first; i <= left_interval.second; i++){
 						int begin = Nz - (LSA[i]+left_pattern.size());
@@ -239,6 +240,7 @@ int main (int argc, char ** argv )
 			// }
 			// output_file << endl;
 			total_occ_no += valid_res.size();
+			// return 0;
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;

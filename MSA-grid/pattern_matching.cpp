@@ -13,6 +13,8 @@ using namespace boost;
 using namespace std;
 using namespace sdsl;
 
+extern string zstrs;
+
 int64_t  find_minimizer_index(string s, int64_t  k) {
   int64_t  minimizer_index = 0;
   for (int64_t  i = 1; i <= s.length() - k; i++) {
@@ -28,13 +30,13 @@ int64_t  find_minimizer_index(string s, int64_t  k) {
 /* Computes the length of lcp of two suffixes of two strings */
 int64_t  lcp ( HeavyString & x, int64_t  M, string & y, int64_t  l, int64_t c)
 {
-	int64_t  xx = c + x.re(c) + 1;
-	if ( M >= xx ) return 0;
+	int64_t  xx = c + x.re(c);
+	if ( M > xx ) return 0;
 	int64_t  yy = y.size();
 	if ( l >= yy ) return 0;
 
 	int64_t  i = 0;
-	while ( ( M + i < xx ) && ( l + i < yy ) )
+	while ( ( M + i < xx + 1) && ( l + i < yy ) )
 	{
 		if ( x[M+i] != y[l+i] )	break;
 		i++;
@@ -147,7 +149,7 @@ pair<int64_t,int64_t> pattern_matching ( string & w, HeavyString & a, int * SA, 
 
 
 			}
-			else if ( ( l == N - SA[i] ) || ( ( SA[i] + l < N ) && ( l != m ) && ( a[SA[i]+l] < w[l] ) ) )
+			else if ( ( l == N - SA[i] ) || ( ( SA[i] + l < N ) && ( l != m ) && ( (a[SA[i]+l] < w[l]) || (a.re(SA[i]) < l) ) ) )
 			{
 				d = i;
 				ld = l;
@@ -169,7 +171,8 @@ pair<int64_t,int64_t> pattern_matching ( string & w, HeavyString & a, int * SA, 
 /* Computes the length of lcs of two suffixes of two strings */
 int64_t  lcs ( HeavyString & x, int64_t  M, string & y, int64_t  l, int c)
 {
-	int64_t xx = 0;
+	int64_t xx = c - x.le(c);
+	// cout << "left ext: " << x.le(c) << endl;
 	if ( M < xx ) return 0;
 	int64_t  yy = y.size();
 	if ( l >= yy ) return 0;
@@ -177,138 +180,12 @@ int64_t  lcs ( HeavyString & x, int64_t  M, string & y, int64_t  l, int c)
 	int64_t  i = 0;
 	while ( ( M - i >= xx ) && ( l + i < yy ) )
 	{
+		// cout << "letter compare: " << x[M-i] << " " << y[l+i] << endl;
 		if ( x[M-i] != y[l+i] )	break;
 		i++;
 	}
 	return i;
 }
-
-
-/* Searching a list of strings using LCP from "Algorithms on Strings" by Crochemore et al. Algorithm takes O(m + log n), where n is the list size and m the length of pattern */
-// pair<int64_t ,int64_t > rev_pattern_matching ( string & w, HeavyString & a, int  * SA, int  * LCP, rmq_succinct_sct<> &rmq, int64_t  n )
-// {
-	// int64_t  m = w.size(); //length of pattern
-	// int64_t  N = a.size(); //length of string 
-	// int64_t  d = -1;
-	// int64_t  ld = 0;
-	// int64_t  f = n;
-	// int64_t  lf = 0;
-	
-	// pair<int64_t ,int64_t > range;
-	
-	// while ( d + 1 < f )
-	// {
-		// int64_t  i = (d + f)/2;
-		// int64_t  revSA = N - 1 - SA[i];
-
-		// /* lcp(i,f) */
-		// int64_t  lcpif;
-		// if( f == n ){
-			// lcpif = 0;
-		// }else{
-			// lcpif = LCP[rmq(i+1, f)];
-		// }
-		
-		// /* lcp(d,i) */
-		// int64_t  lcpdi;
-		// if( i == n ){
-			// lcpdi = 0;
-		// }else{
-			// lcpdi = LCP[rmq(d+1, i)];
-		// }
-
-		// std::cout << revSA << " " << i << " " << d << " " << f << " " << ld << " " << lf << " " << lcpdi << " " << lcpif << std::endl;
-		// if ( ( ld <= lcpif ) && ( lcpif < lf ) )
-		// {
-			// d = i;
-			// ld = lcpif;
-		// }
-		// else if ( ( ld <= lf ) && ( lf < lcpif ) ) {
-			// f = i;
-		// }
-		// else if ( ( lf <= lcpdi ) && ( lcpdi < ld ) )
-		// {
-			// f = i;
-			// lf = lcpdi;
-		// }	
-		// else if ( ( lf <= ld ) && ( ld < lcpdi ) ){
-			// d = i;
-		// }
-		// else
-		// {
-			// int64_t  l = std::max (ld, lf);
-			// l = l + lcs ( a, revSA - l, w, l );
-			// if ( l == m ) //lower bound is found, let's find the upper bound
-		        // {
-				// int64_t  e = i;
-				// while ( d + 1 < e )
-				// {
-					// int64_t  j = (d + e)/2;
-					
-					// /* lcp(j,e) */
-					// int64_t  lcpje;
-					// lcpje = LCP[rmq(j+1, e)];
-
-					// if ( lcpje < m ) 	d = j;
-					// else 			e = j;
-				// }
-
-				// /* lcp(d,e) */
-				// int64_t  lcpde;
-				// if( e == n )
-					// lcpde = 0;
-				// else
-					// lcpde = rmq(d+1, e);
-
-				// if ( lcpde >= m )	d = std::max (d-1,( int64_t  ) -1 );
-
-				// e = i;
-				// while ( e + 1 < f )
-				// {
-					// int64_t  j = (e + f)/2;
-					
-					// /* lcp(e,j) */
-					// int64_t  lcpej;
-					// if( j == n )
-						// lcpej = 0;
-					// else lcpej = LCP[rmq ( e + 1, j ) ];
-
-					// if ( lcpej < m ) 	f = j;
-					// else 			e = j;
-				// }
-
-				// /* lcp(e,f) */
-				// int64_t  lcpef;
-				// if( f == n )
-					// lcpef = 0;
-				// else lcpef = LCP[rmq ( e + 1, f ) ];
-
-				// if ( lcpef >= m )	f = std::min (f+1,n);
-
-				// range.first = d + 1;
-				// range.second = f - 1;
-				// return range;
-				
-				
-			// }
-			// else if ( ( l == N - SA[i] ) || ( ( revSA - l >= 0 ) && ( l != m ) && ( a[revSA - l] < w[l] ) ) )
-			// {
-				// d = i;
-				// ld = l;
-			// }
-			// else
-			// {
-				// f = i;
-				// lf = l;
-			// }	
-
-		// }
-	// }
-
-	// range.first = d + 1;
-	// range.second = f - 1;
-	// return range;
-// }
 
 pair<int64_t,int64_t> rev_pattern_matching ( string & w, HeavyString & a, int * SA, int * LCP, rmq_succinct_sct<> &rmq, int64_t n )
 {
@@ -322,6 +199,7 @@ pair<int64_t,int64_t> rev_pattern_matching ( string & w, HeavyString & a, int * 
 	int64_t lf = 0;
 
 	pair<int64_t,int64_t> interval;
+	
 
 	while ( d + 1 < f )
 	{
@@ -344,6 +222,18 @@ pair<int64_t,int64_t> rev_pattern_matching ( string & w, HeavyString & a, int * 
 			lcpdi = 0;
 		else lcpdi = LCP[rmq ( d + 1, i ) ];
 		
+		// if(d != -1 && f!=n){
+			// cout << i << " d=" << d << " f=" << f << " ld=" << ld << " lf=" << lf << " lcpdi=" << lcpdi << " lcpif=" << lcpif << endl;
+			// string si = zstrs.substr(  N-1-SA[i]-max(24, (int) a.le(N-1-SA[i])), max(25, (int) a.le(N-1-SA[i])+1));
+			// string sd = zstrs.substr(  N-1-SA[d]-a.le(N-1-SA[d]), a.le(N-1-SA[d]) + 1);
+			// string sf = zstrs.substr(  N-1-SA[f]-max(24, (int) a.le(N-1-SA[f])), max(25, (int) a.le(N-1-SA[f])+1));
+			// reverse(si.begin(), si.end());
+			// reverse(sd.begin(), sd.end());
+			// reverse(sf.begin(), sf.end());
+			// cout << sd << " " << a.le(N-1-SA[d])+1 << endl;
+			// cout << si << " " << a.le(N-1-SA[i])+1 << endl;
+			// cout << sf << endl;
+		// }
 	
 		if ( ( ld <= lcpif ) && ( lcpif < lf ) )
 		{
@@ -363,6 +253,7 @@ pair<int64_t,int64_t> rev_pattern_matching ( string & w, HeavyString & a, int * 
 			
 			// avoid the function call if revSA-1<0 or l>=w.size() by changing lcs?
 			l = l + lcs ( a, revSA - l, w, l, revSA );
+			// cout << "l: " << l << endl;
 			if ( l == m ) //lower bound is found, let's find the upper bound
 		    	{
 				int64_t e = i;
@@ -423,15 +314,19 @@ pair<int64_t,int64_t> rev_pattern_matching ( string & w, HeavyString & a, int * 
 
 
 			}
-			else if ( ( l == N - SA[i] ) || ( ( revSA - l >= 0 ) && ( l != m ) && ( a[revSA - l] < w[l] ) ) )
+			else if ( ( l == N - SA[i] ) || ( ( revSA - l >= 0 ) && ( l != m ) && ( ( a[revSA - l] < w[l] ) || a.le(revSA) < l ) ))
 			{
+				// cout << a[revSA-l] << " " << w[l] << endl;
 				d = i;
 				ld = l;
+				// cout << "go f side" << endl;
 			}
 			else
 			{
+				// cout << a[revSA-l] << " " << w[l] << endl;
 				f = i;
 				lf = l;
+				// cout << "go d side" << endl;
 			}
 
 		}

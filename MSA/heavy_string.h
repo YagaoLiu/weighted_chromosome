@@ -58,7 +58,7 @@ class HeavyString{
 			H+=(A[which_max]);
 			double pi = log2(P[i][which_max]);
 			pi_arr.push_back(pi);
-		}		
+		}
 		
 		if(create_pi){				
 			pi_suf.assign(pi_arr.begin(), pi_arr.end());
@@ -68,7 +68,7 @@ class HeavyString{
 		}
 		
 		for(int m : min_pos){
-			int begin = m - le[m];
+			int begin = m - le[m] - 1;
 			int end = m + re[m] + 1;
 			alt_ext[m].first = le[m];
 			alt_ext[m].second = re[m];
@@ -152,7 +152,7 @@ class HeavyString{
 		return substring;
 	}
 	
-	double get_pi(int i, int begin, int length){
+	double get_pi(int i, int begin, int length){		
 		if(begin%n > i%n)			return 0;
 		if(begin%n + length > n)	return 0;
 		if( i - alt_ext[i].first > begin ) return 0;
@@ -176,8 +176,6 @@ class HeavyString{
 	}
 	
 	double check_pi(std::string& pat, size_t pat_begin, size_t txt_begin, size_t length, size_t min_pos){
-		// if(pat_begin + length >= pat.size()) return 0;
-		// if(txt_begin + length >= N) return 0;
 		for(auto i = 0; i < length; i++){
 			if(pat[pat_begin + i] != this->at(txt_begin+i)){
 				return 0;

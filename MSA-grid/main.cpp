@@ -107,6 +107,7 @@ int main (int argc, char ** argv )
 	
 	cout << "index begin" << endl;
 	Estimation fS(text, alphabet, z);
+	
 	string zstrs;
 	vector<int> mini_pos;
 	
@@ -138,15 +139,12 @@ int main (int argc, char ** argv )
 	
 	fS.clear();
 	vector<vector<double>>().swap(text);
-	vector<int>().swap(le);
-	vector<int>().swap(re);
 		
 	int   * forward_SA		= new int   [Nz];
 	int   * forward_LCP	= new int   [Nz];
 	int   * reverse_SA		= new int   [Nz];
 	int   * reverse_LCP	= new int   [Nz];
 	
-	begin = get_time::now();
 	unsigned char * seq = (unsigned char *)zstrs.c_str();
 	divsufsort( seq, forward_SA,  Nz );
 	int  * iSA = new int   [Nz];
@@ -162,7 +160,6 @@ int main (int argc, char ** argv )
 		iSA[reverse_SA[i]] = i;
 	}
 	LCParray( seq, Nz, reverse_SA, iSA, reverse_LCP );
-	
 	delete[] iSA;
 
 	int   * RSA	 = new int   [g];
@@ -173,6 +170,10 @@ int main (int argc, char ** argv )
 	right_compacted_trie ( f_mini_pos, forward_SA, forward_LCP, Nz, RSA, RLCP, g );
 	left_compacted_trie ( f_mini_pos, reverse_SA, reverse_LCP, Nz, LSA, LLCP, g );
 
+	vector<int> le_r(le.rbegin(), le.rend());	
+	union_find_resort ( RSA, RLCP, re, g );
+	union_find_resort ( LSA, LLCP, le_r, g );	
+
 	delete[] forward_SA;
 	delete[] forward_LCP;
 	delete[] reverse_SA;
@@ -180,7 +181,7 @@ int main (int argc, char ** argv )
 	string().swap(zstrs);
 	string().swap(rev_zstrs);	
 	unordered_set<int>().swap(f_mini_pos);
-	
+		
 	vector<int> tmp_llcp(LLCP, LLCP+g);
 	vector<int> tmp_rlcp(RLCP, RLCP+g);	
 	rmq_succinct_sct<> lrmq ( &tmp_llcp );
@@ -188,6 +189,9 @@ int main (int argc, char ** argv )
 
 	vector<int>().swap(tmp_llcp);
 	vector<int>().swap(tmp_rlcp);
+	vector<int>().swap(le);
+	vector<int>().swap(re);
+	vector<int>().swap(le_r);
 
 	vector<pair<int  ,int  >> l;
 	vector<pair<int  ,int  >> r;
@@ -248,11 +252,13 @@ int main (int argc, char ** argv )
 			// output_file << pattern << ":"; 
 			size_t j = find_minimizer_index(pattern, k);
 			string left_pattern = pattern.substr(0, j+1);
+			
+
 			reverse(left_pattern.begin(), left_pattern.end());
 			pair<int64_t ,int64_t> left_interval = rev_pattern_matching ( left_pattern, fH, LSA, LLCP, lrmq, (int64_t)g ); 
-			string right_pattern = pattern.substr(j);
-			pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g ); 			
-			
+			string right_pattern = pattern.substr(j);			
+			pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g );
+
 			if ( left_interval.first <= left_interval.second  && right_interval.first <= right_interval.second )
 			{			
 				//Finding rectangle containing bd-anchors in grid
