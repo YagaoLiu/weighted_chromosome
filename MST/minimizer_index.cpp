@@ -54,54 +54,79 @@ void extention ( vector<vector<double>>& text, string& s, string& alph, vector<i
 	for(int i = 0; i < N; i++){
 		_pi.push_back( text[i%n][A[s[i]]]);
 	}	
-
+	
+	int l = 0;
+	double cum_pi = 1;
+	
 	re.assign(N,0);	
 	for (auto j = 0; j < z; j++ ){
-		int i = 0;
-		int si = i + j*n;
-		int l = 0;
-		double cum_pi = _pi[si];
-		while( (cum_pi * z >= 1) && (i+l < n) ){
-			l++;
-			cum_pi *= _pi[si+l];
-		}
-		re[si] = l-1<0 ? 0 : l-1;
-		
-		for(i = 1; i < n; i++){
-			si++;
-			if(l > 0) l--;
-			cum_pi /= _pi[si-1];
-			while( (cum_pi * z >= 1) && (i+l < n) ){
-				l++;
-				cum_pi *= _pi[si+l];
+		for(auto i = 0; i < n; i++){
+			int si = i + j*n;
+			if( i == 0 || re[si-1] < 1 ){
+				l = 0;
+				cum_pi = 1;
+				for( l = 0; l < n-i-1; l++){
+					if(cum_pi * _pi[si+l] * z >= 1){
+						cum_pi *= _pi[si+l];
+					}else{
+						break;
+					}
+				}
+				re[si] = l-1;
+			}else{
+				l = re[si-1];
+				cum_pi /= _pi[si-1];
+				if ( cum_pi * z < 1 ){
+					re[si] = l -1;
+				}else{
+					for ( l = l; l < n-i-1; l++ ){
+						if(cum_pi * _pi[si+l] * z >= 1){
+							cum_pi *= _pi[si+l];
+						}else{
+							break;
+						}
+					}
+					re[si] = l-1;
+				}
 			}
-			re[si] = l-1<0 ? 0 : l-1;
-		}		
+		}
 	}
 	
 	le.assign(N,0);
 	reverse(_pi.begin(), _pi.end());
 	for (auto j = 0; j < z; j++ ){
-		int i = 0;
-		int si = i + j*n;
-		int l = 0;
-		double cum_pi = _pi[si];
-		while( (cum_pi * z >= 1) && (i+l < n) ){
-			l++;
-			cum_pi *= _pi[si+l];
-		}
-		le[si] = l-1<0 ? 0 : l-1;
-		
-		for(i = 1; i < n; i++){
-			si++;
-			if(l > 0) l--;
-			cum_pi /= _pi[si-1];
-			while( (cum_pi * z >= 1) && (i+l < n) ){
-				l++;
-				cum_pi *= _pi[si+l];
+		for(auto i = 0; i < n; i++){
+			int si = i + j*n;
+			if( i == 0 || le[si-1] < 1 ){
+				l = 0;
+				cum_pi = 1;
+				for( l = 0; l < n-i; l++){
+					if(cum_pi * _pi[si+l] * z >= 1){
+						cum_pi *= _pi[si+l];
+					}else{
+						break;
+					}
+				}
+				le[si] = l-1;
+			}else{
+				l = le[si-1];
+				cum_pi /= _pi[si-1];
+				if ( cum_pi < 1/z )
+					le[si] = l -1;
+				else
+				{
+					for ( l = l; l < n-i; l++ )
+					{
+						if(cum_pi * _pi[si+l] * z >= 1){
+							cum_pi *= _pi[si+l];
+						}else{
+							break;
+						}
+					}
+					le[si] = l-1;
+				}
 			}
-			le[si] = l-1<0 ? 0 : l-1;
-		}		
+		}	
 	}
 	reverse(le.begin(), le.end());
 }

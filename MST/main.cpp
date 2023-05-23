@@ -64,14 +64,14 @@ int main (int argc, char ** argv ) {
 		for (string pattern; getline(patterns, pattern); ){
 			// output_file << pattern << ":";
 			std::vector<int> occs = M.occurrences(pattern, ell, st.z, output_file);
-			// if (occs.empty()) {
+			if (occs.empty()) {
 				// output_file << "\n";
-			// } else {
+			} else {
 				// for (auto p : occs) {
 					// output_file << p << " ";
 				// }
 				// output_file << endl;
-			// }
+			}
 			total_occ += occs.size();
 		}
 		end = get_time::now();

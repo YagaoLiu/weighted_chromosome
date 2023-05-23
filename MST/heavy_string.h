@@ -178,6 +178,14 @@ class HeavyString{
 		return this->get_pi(min_pos,txt_begin, length);
 	}
 	
+	size_t le(size_t i){
+		return alt_ext[i].first;
+	}
+	
+	size_t re(size_t i){
+		return alt_ext[i].second;
+	}
+	
 	size_t length() const {return N;}
 	size_t heavy_length() const {return n;}
 
