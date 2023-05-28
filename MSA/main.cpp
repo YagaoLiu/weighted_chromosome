@@ -172,6 +172,7 @@ int main (int argc, char ** argv )
 	unordered_set<int>().swap(f_mini_pos);
 	vector<int>().swap(le);
 	vector<int>().swap(re);
+	vector<int>().swap(le_r);
 
 	mi = mallinfo2();
 	
