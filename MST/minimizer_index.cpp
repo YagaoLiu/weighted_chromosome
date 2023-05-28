@@ -17,12 +17,11 @@ using std::endl;
 using std::cerr;
 using get_time = std::chrono::steady_clock;
 
-bool sort_sa(const pair<int,int> &a,const pair<int,int> &b)
-{
+bool sort_sa(const pair<int,int> &a,const pair<int,int> &b){
        return a.first<b.first;
 }
 
-std::istream & operator >> (std::istream& input, MinimizerIndex &M) {
+std::istream & operator >> (std::istream& input, MinimizerIndex &M){
     input >> M.N;
     input >> M.alph;
     int A = M.alph.size();
