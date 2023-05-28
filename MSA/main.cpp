@@ -101,7 +101,9 @@ int main (int argc, char ** argv )
 		std::vector<int> M;
 		minimizers_with_kr(s.string(), M,w, k);
 		for(auto it : M)
+			if(s._pi[it] >= k){
 				mini_pos.push_back(it + ii*N);
+			}
 		ii++;
 	}
 
@@ -142,6 +144,8 @@ int main (int argc, char ** argv )
 		iSA[rSA[i]] = i;
 	}
 	LCParray( seq, Nz, rSA, iSA, rLCP );
+	delete[] iSA;
+
 	int   * RSA	 = new int   [g];
 	int   * RLCP = new int   [g];
 	int   * LSA	 = new int   [g];
@@ -158,7 +162,6 @@ int main (int argc, char ** argv )
 	delete[] fLCP;
 	delete[] rSA;
 	delete[] rLCP;
-	delete[] iSA;
 	
 	vector<int> tmp_llcp(LLCP, LLCP+g);
 	vector<int> tmp_rlcp(RLCP, RLCP+g);	
