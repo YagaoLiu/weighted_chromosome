@@ -172,6 +172,7 @@ int main (int argc, char ** argv )
 	string().swap(rev_zstrs);	
 	vector<int>().swap(tmp_llcp);
 	vector<int>().swap(tmp_rlcp);
+	vector<int>().swap(mini_pos);
 	unordered_set<int>().swap(f_mini_pos);
 	vector<int>().swap(le);
 	vector<int>().swap(re);

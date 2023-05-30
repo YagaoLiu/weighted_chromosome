@@ -372,4 +372,6 @@ void union_find_resort( int * SA, int * LCP, vector<int>& property, int n )
 	{
 		LCP[i] = pLCP[i];
 	}
+	
+	delete[] ME;
 }
