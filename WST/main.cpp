@@ -32,19 +32,19 @@ using namespace std::chrono;
 using get_time = std::chrono::steady_clock;
 
 int main (int argc, char ** argv ) {
-    Settings st = decode_switches(argc, argv);
+    	Settings st = decode_switches(argc, argv);
 	istream& text = st.text.is_open()?st.text:cin;
-    string& pfile_prefix = st.patterns;
-    ostream& output = st.output.is_open()?st.output:cout;
+    	string& pfile_prefix = st.patterns;
+    	ostream& output = st.output.is_open()?st.output:cout;
 
 	auto begin = get_time::now();
 	struct mallinfo2 mi;
-    mi = mallinfo2();
+    	mi = mallinfo2();
 	double begin_ram = mi.hblkhd + mi.uordblks;
 
 	WeightedSequence W;
-    text >> W;
-    W.build_index(st.z, st.quiet, output);
+    	text >> W;
+    	W.build_index(st.z, st.quiet, output);
 		
 	mi = mallinfo2();
 	double end_ram = mi.hblkhd + mi.uordblks;
@@ -52,11 +52,9 @@ int main (int argc, char ** argv ) {
 	
 	auto end = get_time::now();
 	auto diff = end - begin;
-	output << "Construct time:" << chrono::duration_cast<chrono::milliseconds>(diff).count() << " ms" << endl;
-	output << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
+	output << "CT " << chrono::duration_cast<chrono::milliseconds>(diff).count() << endl;
+	output << "IS " << (end_ram-begin_ram)/1000000 << endl;
 		
-	cout << "Start patterm matching" << endl;
-#if 0
 	string pfile_suffix[7] = {"p32.txt.gz","p64.txt.gz","p128.txt.gz","p256.txt.gz","p512.txt.gz","p1024.txt.gz","p2048.txt.gz"};
 	for(string ps : pfile_suffix){
 		string pfile = pfile_prefix + ps;
@@ -70,9 +68,8 @@ int main (int argc, char ** argv ) {
 		}
 		auto end1 = get_time::now();
 		auto diff1 = end1 - begin1;
-		output << pfile << " total search:" << chrono::duration_cast<chrono::milliseconds>(diff1).count() << endl;
+		output << pfile << " PMT " << chrono::duration_cast<chrono::milliseconds>(diff1).count() << endl;
 	}
-#endif
 
     return 0;
 }
