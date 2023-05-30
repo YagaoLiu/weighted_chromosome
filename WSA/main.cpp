@@ -102,14 +102,14 @@ int main (int argc, char ** argv )
 	double end_ram = mi.hblkhd + mi.uordblks;
 	auto end = get_time::now();
 	auto diff2 = end - begin;
-	output_file<<"Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
-	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
+	output_file<<"CT "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<< endl;	
+	output_file << "IS " << (end_ram-begin_ram)/1000000 << endl;
 	
 	string pfile_suffix[7] = {"p32.txt.gz","p64.txt.gz","p128.txt.gz","p256.txt.gz","p512.txt.gz","p1024.txt.gz","p2048.txt.gz"};
 	for(string ps : pfile_suffix){	
 		string pfile = pfile_prefix + ps;
 		begin = get_time::now();
-				ifstream file(pfile, std::ios_base::in | std::ios_base::binary);
+		ifstream file(pfile, std::ios_base::in | std::ios_base::binary);
 		boost::iostreams::filtering_istream patterns;
 		patterns.push(boost::iostreams::gzip_decompressor());
 		patterns.push(file);		
@@ -134,7 +134,7 @@ int main (int argc, char ** argv )
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
-		output_file << pfile << " Search Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"ms "<<endl;
+		output_file << "PMT "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<< endl;
 	}	
 
 #if 0 
