@@ -180,6 +180,7 @@ int main (int argc, char ** argv )
 	delete[] reverse_LCP;
 	string().swap(zstrs);
 	string().swap(rev_zstrs);	
+	vector<int>().swap(mini_pos);
 	unordered_set<int>().swap(f_mini_pos);
 		
 	vector<int> tmp_llcp(LLCP, LLCP+g);
