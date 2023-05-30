@@ -39,17 +39,17 @@ using get_time = chrono::steady_clock;
 
 int main (int argc, char ** argv )
 {
-    Settings st = decode_switches(argc, argv);
+    	Settings st = decode_switches(argc, argv);
 	istream& text_file = st.text.is_open()?st.text:cin;
 	ostream& output_file = st.output.is_open()?st.output:cout;
-    string& pfile_prefix = st.patterns;
+    	string& pfile_prefix = st.patterns;
 	ofstream result;
 	
 	double z = st.z;
 	
 	auto begin = get_time::now();
 	struct mallinfo2 mi;
-    mi = mallinfo2();
+    	mi = mallinfo2();
 	double begin_ram = mi.hblkhd + mi.uordblks;
 	string alphabet;
 	vector<vector<double>> text;
@@ -66,13 +66,8 @@ int main (int argc, char ** argv )
             sum += symbol[j];
         }
         text.emplace_back(symbol);
-    }
+    	}
 
-	// cout << "text length:" << N << endl;
-	// cout << "Finish reading input" << endl;
-	
-
-	// cout << "index begin" << endl;
 	Estimation fS(text, alphabet, z);
 	PropertyString fT;
 	
@@ -91,7 +86,6 @@ int main (int argc, char ** argv )
 		
 	begin = get_time::now();
 	SA_LCP_index ( text, fT.string().c_str(), Nz, N, z, SA, LCP );
-//	union_find_resort ( SA, LCP, ME, Nz );
 
 	vector<int> tmp_lcp ( LCP, LCP+Nz);
 	rmq_succinct_sct<> rmq ( &tmp_lcp );
@@ -134,24 +128,9 @@ int main (int argc, char ** argv )
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
-		output_file << "PMT "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<< endl;
+		output_file << pfile << " PMT "<< chrono::duration_cast<chrono::milliseconds>(diff3).count() << endl;
 	}	
 
-#if 0 
-	vector<int> WSA;
-	vector<int> WLCP;
-	WSA.reserve ( N );
-	WLCP.reserve ( N );
-	begin =get_time:: now();
-	WeightedIndex ( n, N, SA, LCP, ME, WSA, WLCP );
-	
-
-	for ( int i = 0; i < N; i++ )
-		if ( ME[SA[i]] != 0 )
-			result << fT.string().substr(SA[i], ME[SA[i]]) << '\n';
-	result.close();	
-#endif
-	
 	return 0;
 }
 
