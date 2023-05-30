@@ -183,8 +183,8 @@ int main (int argc, char ** argv )
 	double end_ram = mi.hblkhd + mi.uordblks;
 	auto end = get_time::now();
 	auto diff2 = end - begin;
-	output_file << "ConstructTime:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<endl;	
-	output_file << "ConstructSpace: " << (end_ram-begin_ram)/1000000 << endl;
+	output_file << "CT "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<endl;	
+	output_file << "CS " << (end_ram-begin_ram)/1000000 << endl;
 	
 	if(!st.patterns.empty()){
 		size_t total_occ_no = 0;
@@ -249,7 +249,7 @@ int main (int argc, char ** argv )
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
-		output_file << pfile << " Search Time: "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"\n Totally " << total_occ_no << " occurrences are found." << endl;
+		output_file << "ST "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"\n Totally " << total_occ_no << " occurrences are found." << endl;
 	}
 
 	return 0;
