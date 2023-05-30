@@ -376,5 +376,4 @@ void union_find_resort( int * SA, int * LCP, vector<int>& property, int n )
 	delete[] ME;
 	map<int, vector<int>>().swap(lcp_map);
 	map<int, vector<int>>().swap(me_map);
-	delete uf;
 }
