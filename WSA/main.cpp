@@ -102,12 +102,11 @@ int main (int argc, char ** argv )
 	string pfile_suffix[7] = {"p32.txt.gz","p64.txt.gz","p128.txt.gz","p256.txt.gz","p512.txt.gz","p1024.txt.gz","p2048.txt.gz"};
 	for(string ps : pfile_suffix){	
 		string pfile = pfile_prefix + ps;
-		begin = get_time::now();
 		ifstream file(pfile, std::ios_base::in | std::ios_base::binary);
 		boost::iostreams::filtering_istream patterns;
 		patterns.push(boost::iostreams::gzip_decompressor());
 		patterns.push(file);		
-		auto begin1 = get_time::now();
+		begin = get_time::now();
 		for (string pattern; getline(patterns, pattern); ){
 			int m = pattern.size();
 			list<int> Occ;
