@@ -34,24 +34,24 @@ using namespace std::chrono;
 using get_time = std::chrono::steady_clock;
 
 int main (int argc, char ** argv ) {
-    Settings st = decode_switches(argc, argv);
-    istream& text = st.text.is_open()?st.text:cin;
-    ostream& output_file = st.output.is_open()?st.output:cout;
+    	Settings st = decode_switches(argc, argv);
+    	istream& text = st.text.is_open()?st.text:cin;
+    	ostream& output_file = st.output.is_open()?st.output:cout;
 	int ell = st.ell;
 	
 	auto begin = get_time::now();
 	struct mallinfo2 mi;
-    mi = mallinfo2();
+   	 mi = mallinfo2();
 	auto begin_ram = mi.hblkhd + mi.uordblks;
 	MinimizerIndex M;
 	text >> M;
-    M.build_index(st.z, ell);
+    	M.build_index(st.z, ell);
 	mi = mallinfo2();
 	auto end_ram = mi.hblkhd + mi.uordblks;
 	auto end = get_time::now();
 	auto diff2 = end - begin;
-	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
-	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
+	output_file << "CT "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<endl;	
+	output_file << "IS " << (end_ram-begin_ram)/1000000<< endl;
 
 	if(!st.patterns.empty()){		
 		int total_occ = 0;
@@ -76,7 +76,7 @@ int main (int argc, char ** argv ) {
 		}
 		end = get_time::now();
 		auto diff = end - begin;
-		output_file << "Search Time:  " << chrono::duration_cast<chrono::milliseconds>(diff).count() << "ms. \n Totally " << total_occ << " occurrences are found." << endl;
+		output_file << "PMT " << chrono::duration_cast<chrono::milliseconds>(diff).count() << "\nOCCS " << total_occ << endl;
 	}
 
 	
