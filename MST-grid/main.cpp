@@ -80,8 +80,6 @@ int main (int argc, char ** argv ) {
 		output_file << "PMT " << chrono::duration_cast<chrono::milliseconds>(diff).count() << "\nOCCS " << total_occ << endl;
 	}
 
-	
-
     return 0;
 }
 
