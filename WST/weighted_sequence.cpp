@@ -53,6 +53,7 @@ std::istream & operator >> (std::istream& input, WeightedSequence &X) {
         }
         X.P.emplace_back(symbol);
     }
+	X.len = X.P.size();
     return input;
 }
 
@@ -80,7 +81,7 @@ bool WeightedSequence::contains(std::string const& P) const {
 std::vector<int> WeightedSequence::occurrences(std::string const& P) const {
     std::set<int> occs;
     for (int o : weighted_index->occurrences(P)) {
-        occs.insert(o % length());
+        occs.insert(o % len);
     }
     return std::vector<int>(occs.begin(), occs.end());
     

@@ -26,6 +26,7 @@ class WeightedSequence {
     std::string alph;
     std::vector<std::vector<double>> P;
     PropertySuffixTree const* weighted_index;
+	size_t len;
     
     friend std::istream & operator >> (std::istream& input, WeightedSequence &X);
 
@@ -35,7 +36,7 @@ public:
         if (weighted_index) delete weighted_index;
     }
     
-    std::size_t length() const { return P.size(); }
+    std::size_t length() const { return len; }
     std::size_t sigma() const { return alph.size(); }
     std::vector<double> const& probability(size_t i) const { return P[i]; }
     char symbol(size_t a) const { return alph[a]; }
