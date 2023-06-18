@@ -51,6 +51,20 @@ bool sort_sa(const pair<int,int> &a,const pair<int,int> &b)
        return a.first<b.first;
 }
 
+bool is_valid(vector<vector<double>>& text, string& alph, string& p, int64_t   pos, double z){
+	unordered_map<char, int> mapping;
+	pos = pos%(text.size());
+	if(pos + p.size() > text.size()) return false;
+	for(int i = 0; i < alph.size(); i++){
+		mapping[alph[i]] = i;
+	}
+	double cum_prob = 1;
+	for(int i = 0; i < p.size(); i++){
+		cum_prob *= text[pos+i][mapping[p[i]]];
+	}
+	return (cum_prob*z >= 1)?true:false;
+}
+
 int main (int argc, char ** argv )
 {
     Settings st = decode_switches(argc, argv);
@@ -58,6 +72,7 @@ int main (int argc, char ** argv )
 	ostream& output_file = st.output.is_open()?st.output:cout;
 	ofstream result;
 	
+	auto begin = get_time::now();
 	struct mallinfo2 mi;
     mi = mallinfo2();
 	double begin_ram = mi.hblkhd + mi.uordblks;
@@ -89,7 +104,6 @@ int main (int argc, char ** argv )
 	int k = ceil(4 * log2(ell) / log2(alphabet.size()));
 	int w = ell - k + 1;
 
-	auto begin = get_time::now();
 	cout << "index begin" << endl;
 	Estimation fS(text, alphabet, z);
 	string zstrs;
@@ -101,9 +115,7 @@ int main (int argc, char ** argv )
 		std::vector<int> M;
 		minimizers_with_kr(s.string(), M,w, k);
 		for(auto it : M)
-			if(s._pi[it] >= k){
 				mini_pos.push_back(it + ii*N);
-			}
 		ii++;
 	}
 
@@ -121,7 +133,7 @@ int main (int argc, char ** argv )
 	HeavyString fH(text, zstrs, alphabet, f_mini_pos, le, re, true);
 	
 	fS.clear();
-	vector<vector<double>>().swap(text);
+	// vector<vector<double>>().swap(text);
 
 
 	int   * fSA		= new int   [Nz];
@@ -144,8 +156,7 @@ int main (int argc, char ** argv )
 		iSA[rSA[i]] = i;
 	}
 	LCParray( seq, Nz, rSA, iSA, rLCP );
-	delete[] iSA;
-
+	
 	int   * RSA	 = new int   [g];
 	int   * RLCP = new int   [g];
 	int   * LSA	 = new int   [g];
@@ -162,6 +173,7 @@ int main (int argc, char ** argv )
 	delete[] fLCP;
 	delete[] rSA;
 	delete[] rLCP;
+	delete[] iSA;
 	
 	vector<int> tmp_llcp(LLCP, LLCP+g);
 	vector<int> tmp_rlcp(RLCP, RLCP+g);	
@@ -172,7 +184,6 @@ int main (int argc, char ** argv )
 	string().swap(rev_zstrs);	
 	vector<int>().swap(tmp_llcp);
 	vector<int>().swap(tmp_rlcp);
-	vector<int>().swap(mini_pos);
 	unordered_set<int>().swap(f_mini_pos);
 	vector<int>().swap(le);
 	vector<int>().swap(re);
@@ -183,8 +194,8 @@ int main (int argc, char ** argv )
 	double end_ram = mi.hblkhd + mi.uordblks;
 	auto end = get_time::now();
 	auto diff2 = end - begin;
-	output_file << "CT "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<endl;	
-	output_file << "IS " << (end_ram-begin_ram)/1000000 << endl;
+	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
+	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
 	
 	if(!st.patterns.empty()){
 		size_t total_occ_no = 0;
@@ -212,12 +223,17 @@ int main (int argc, char ** argv )
 					for(int64_t i = left_interval.first; i <= left_interval.second; i++){
 						int begin = Nz - (LSA[i]+left_pattern.size());
 						if(begin < 0 || begin + pattern.size() >= Nz) continue;
-						if(valid_res.count(begin%N)) continue;						
-						int c = Nz - LSA[i] - 1;
-						double lpi = fH.get_pi(c, begin, l);
-						double rpi = fH.check_pi(pattern, l, begin+l, r, c);	
+						if(valid_res.count(begin%N)) continue;	
 						
-						if( lpi * rpi * z >= 1 ){
+						// int c = Nz - LSA[i] - 1;						
+						// double lpi = fH.get_pi(c, begin, l);
+						// double rpi = fH.check_pi(pattern, l, begin+l, r, c);
+						
+						// if( lpi * rpi * z >= 1 ){
+							// valid_res.insert( begin%N );
+						// }
+						
+						if(is_valid(text, alphabet, pattern, begin, z)){
 							valid_res.insert( begin%N );
 						}
 					}
@@ -232,9 +248,13 @@ int main (int argc, char ** argv )
 						if(begin < 0 || begin + pattern.size() >= Nz) continue;
 						if(valid_res.count(begin%N)) continue;
 						
-						double rpi = fH.get_pi( RSA[i], RSA[i], r);
-						double lpi = fH.check_pi(pattern, 0, begin, l,  RSA[i]);
-						if( rpi * lpi * z >= 1 ){
+						// double rpi = fH.get_pi( RSA[i], RSA[i], r);
+						// double lpi = fH.check_pi(pattern, 0, begin, l,  RSA[i]);
+						// if( rpi * lpi * z >= 1 ){
+							// valid_res.insert( begin%N );
+						// }
+						
+						if(is_valid(text, alphabet, pattern, begin, z)){
 							valid_res.insert( begin%N );
 						}
 					}
@@ -249,7 +269,7 @@ int main (int argc, char ** argv )
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
-		output_file << "PMT "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"\n" << "OCCS " << total_occ_no << endl;
+		output_file << pfile << " Search Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"ms. \n Totally " << total_occ_no << " occurrences are found." << endl;
 	}
 
 	return 0;
