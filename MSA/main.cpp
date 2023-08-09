@@ -194,12 +194,13 @@ int main (int argc, char ** argv )
 	double end_ram = mi.hblkhd + mi.uordblks;
 	auto end = get_time::now();
 	auto diff2 = end - begin;
-	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
-	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
+
+	output_file << "CT "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<< endl;
+	output_file << "IS " << (end_ram-begin_ram)/1000000 << endl;
 	
 	if(!st.patterns.empty()){
 		size_t total_occ_no = 0;
-		cout << "pattern matching begin" << endl;
+		//cout << "pattern matching begin" << endl;
 		string pfile = st.patterns;
 
 		ifstream file(pfile, std::ios_base::in | std::ios_base::binary);
@@ -269,7 +270,7 @@ int main (int argc, char ** argv )
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
-		output_file << pfile << " Search Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"ms. \n Totally " << total_occ_no << " occurrences are found." << endl;
+		output_file << "PMT "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"\n" << "OCCS " << total_occ_no << endl;
 	}
 
 	return 0;
