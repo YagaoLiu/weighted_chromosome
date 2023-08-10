@@ -107,6 +107,7 @@ int main (int argc, char ** argv )
 		patterns.push(boost::iostreams::gzip_decompressor());
 		patterns.push(file);		
 		begin = get_time::now();
+		int total_occ_no = 0;
 		for (string pattern; getline(patterns, pattern); ){
 			int m = pattern.size();
 			list<int> Occ;
@@ -118,7 +119,8 @@ int main (int argc, char ** argv )
 				for ( auto it = Occ.begin(); it != Occ.end(); it++ )
 				{
 					if(ME[*it] >= pattern.size()){
-						//output_file << *it << ' ';
+						total_occ_no++;
+						//output_file << *it <<endl;
 					}
 				}
 				//output_file << '\n';
@@ -127,7 +129,7 @@ int main (int argc, char ** argv )
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
-		output_file << pfile << " PMT "<< chrono::duration_cast<chrono::milliseconds>(diff3).count() << endl;
+		output_file << "PMT "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"\n" << "OCCS " << total_occ_no << endl;
 	}	
 
 	return 0;
