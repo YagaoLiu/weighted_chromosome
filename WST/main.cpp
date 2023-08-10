@@ -63,12 +63,15 @@ int main (int argc, char ** argv ) {
 		patterns.push(boost::iostreams::gzip_decompressor());
 		patterns.push(file);		
 		auto begin1 = get_time::now();
+
+		int total_occ_no = 0;
 		for (string str; getline(patterns, str); ){
 			vector<int> occs = W.occurrences(str);
+			total_occ_no += occs.size();
 		}
 		auto end1 = get_time::now();
 		auto diff1 = end1 - begin1;
-		output << pfile << " PMT " << chrono::duration_cast<chrono::milliseconds>(diff1).count() << endl;
+		output << "PMT "<< chrono::duration_cast<chrono::milliseconds>(diff1).count()<<"\n" << "OCCS " << total_occ_no << endl;
 	}
 
     return 0;
