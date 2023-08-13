@@ -194,10 +194,9 @@ int main (int argc, char ** argv )
 	double end_ram = mi.hblkhd + mi.uordblks;
 	auto end = get_time::now();
 	auto diff2 = end - begin;
-	output_file << "Construct Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<" ms"<<endl;	
-	output_file << "Construct space:" << (end_ram-begin_ram)/1000000 << " MB" << endl;
+	output_file << "CT: "<< chrono::duration_cast<chrono::milliseconds>(diff2).count()<<endl;	
+	output_file << "IS: " << (end_ram-begin_ram)/1000000 << endl;
 	
-	size_t total_occ_no = 0;
 	string pfile_suffix[7] = {"p32.txt.gz","p64.txt.gz","p128.txt.gz","p256.txt.gz","p512.txt.gz","p1024.txt.gz","p2048.txt.gz"};
 	for(string ps : pfile_suffix){	
 		string pfile = pfile_prefix + ps;
@@ -206,6 +205,7 @@ int main (int argc, char ** argv )
 		boost::iostreams::filtering_istream patterns;
 		patterns.push(boost::iostreams::gzip_decompressor());
 		patterns.push(file);		
+		size_t total_occ_no = 0;
 		for (string pattern; getline(patterns, pattern); ){
 			int m = pattern.size();
 			set<int64_t> valid_res;
@@ -224,7 +224,7 @@ int main (int argc, char ** argv )
 		}
 		end = get_time::now();
 		auto diff3 = end - begin;
-		output_file << pfile << " Search Time:  "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"ms. \n Totally " << total_occ_no << " occurrences are found." << endl;
+		output_file << pfile << " PMT: "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"\n OCCS " << total_occ_no << endl;
 	}	
 	
 	return 0;
