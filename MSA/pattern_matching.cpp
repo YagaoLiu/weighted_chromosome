@@ -15,6 +15,7 @@ using namespace sdsl;
 
 extern string zstrs;
 
+/*
 int64_t  find_minimizer_index(string s, int64_t  k) {
   int64_t  minimizer_index = 0;
   for (int64_t  i = 1; i <= s.length() - k; i++) {
@@ -25,7 +26,29 @@ int64_t  find_minimizer_index(string s, int64_t  k) {
 
   return minimizer_index;
 }
+*/
 
+int64_t find_minimizer_index(string s, int64_t k) {
+  // Initialize the minimizer as the first substring
+  string min = s.substr(0, k);
+  // Initialize the index of the minimizer as 0
+  int min_index = 0;
+  // Loop over the windows of size w
+  for (int i = 0; i <= s.length() - k; i++) {
+    // Get the current substring
+    string cur = s.substr(i, k);
+    // Get the index of the current substring
+    int cur_index = i;
+    // Compare it with the minimizer
+    if (cur.compare(min) < 0) {
+      // Update the minimizer and its index if smaller
+      min = cur;
+      min_index = cur_index;
+    }
+  }
+  // Return the index of the minimizer
+  return min_index;
+}
 
 /* Computes the length of lcp of two suffixes of two strings */
 int64_t  lcp ( HeavyString & x, int64_t  M, string & y, int64_t  l, int64_t c)
