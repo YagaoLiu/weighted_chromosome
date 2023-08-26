@@ -270,15 +270,15 @@ int main (int argc, char ** argv )
 						if(begin < 0 || begin + pattern.size() >= Nz) continue;
 						if(valid_res.count(begin%N)) continue;
 						
-						// double rpi = fH.get_pi( RSA[i], RSA[i], r);
-						// double lpi = fH.check_pi(pattern, 0, begin, l,  RSA[i]);
-						// if( rpi * lpi * z >= 1 ){
-							// valid_res.insert( begin%N );
-						// }
-						
-						if(is_valid(text, alphabet, pattern, begin, z)){
-							valid_res.insert( begin%N );
+						double rpi = fH.get_pi( RSA[i], RSA[i], r);
+						double lpi = fH.check_pi(pattern, 0, begin, l,  RSA[i]);
+						if( rpi * lpi * z >= 1 ){
+							 valid_res.insert( begin%N );
 						}
+						
+						//if(is_valid(text, alphabet, pattern, begin, z)){
+							//valid_res.insert( begin%N );
+						//}
 					}
 					auto ev2 = get_time::now();											
 					verify_time += chrono::duration_cast<chrono::microseconds>(ev2-bv2).count();
