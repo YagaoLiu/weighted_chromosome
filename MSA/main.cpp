@@ -219,9 +219,9 @@ int main (int argc, char ** argv )
 			set<int64_t> valid_res;
 			// output_file << pattern << ":"; 
 			auto bf = get_time::now();
-			unordered_set<uint64_t> min_ind;
-			compute_minimizers(pattern, ell, k, min_ind);
-			size_t j = *min_ind.begin();
+
+			size_t j = pattern_minimizers(pattern, k);
+
 			auto ef = get_time::now();
 			mini_time += chrono::duration_cast<chrono::microseconds>(ef-bf).count();
 			int l = j;
@@ -233,8 +233,8 @@ int main (int argc, char ** argv )
 				pair<int64_t ,int64_t> left_interval = rev_pattern_matching ( left_pattern, fH, LSA, LLCP, lrmq, (int64_t)g );
 				auto e1 = get_time::now();
 				search_time += chrono::duration_cast<chrono::microseconds>(e1-b1).count();
-						auto bv1 = get_time::now();
-				if( left_interval.first <= left_interval.second ){					
+				if( left_interval.first <= left_interval.second ){		
+					auto bv1 = get_time::now();
 					for(int64_t i = left_interval.first; i <= left_interval.second; i++){
 						int begin = Nz - (LSA[i]+left_pattern.size());
 						if(begin < 0 || begin + pattern.size() >= Nz) continue;
@@ -252,18 +252,19 @@ int main (int argc, char ** argv )
 						//	valid_res.insert( begin%N );
 						//}
 					}
-											auto ev1 = get_time::now();
-											verify_time += chrono::duration_cast<chrono::microseconds>(ev1-bv1).count();
+					auto ev1 = get_time::now();
+					verify_time += chrono::duration_cast<chrono::microseconds>(ev1-bv1).count();
 				}
+				
 	
 			}else{
 				string right_pattern = pattern.substr(j);
-							auto b2 = get_time::now();
+				auto b2 = get_time::now();
 				pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g );
-							auto e2 = get_time::now();
+				auto e2 = get_time::now();
 				search_time += chrono::duration_cast<chrono::microseconds>(e2-b2).count();
-						auto bv2 = get_time::now();
 				if( right_interval.first <= right_interval.second ){
+					auto bv2 = get_time::now();
 					for(int64_t i = right_interval.first; i <= right_interval.second; i++){
 						int begin = RSA[i] - l;						
 						if(begin < 0 || begin + pattern.size() >= Nz) continue;
@@ -279,10 +280,9 @@ int main (int argc, char ** argv )
 							valid_res.insert( begin%N );
 						}
 					}
+					auto ev2 = get_time::now();											
+					verify_time += chrono::duration_cast<chrono::microseconds>(ev2-bv2).count();
 				}
-										auto ev2 = get_time::now();											
-										verify_time += chrono::duration_cast<chrono::microseconds>(ev2-bv2).count();
-
 			}
 			// for(auto occ : valid_res){
 				// output_file << occ << " ";
