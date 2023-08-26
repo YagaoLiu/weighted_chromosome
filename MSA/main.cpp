@@ -29,10 +29,11 @@
 #include "input.h"
 #include "estimation.h"
 #include "property_string.h"
-#include "anchors_new.h"
 #include "sa.h"
 #include "grid.h"
 #include "pattern_matching.h"
+#include "krfp.h"
+#include "minimizers.h"
 
 #include <divsufsort.h>
 #include <sdsl/rmq_support.hpp>
@@ -82,6 +83,7 @@ int main (int argc, char ** argv )
 
 	string alphabet;
 	vector<vector<double>> text;
+	karp_rabin_hashing::init();
 
 	int   N;
 	text_file >> N;
@@ -112,8 +114,9 @@ int main (int argc, char ** argv )
 	int  ii = 0;
 	for(PropertyString const & s : fS.strings()){
 		zstrs += s.string();
-		std::vector<int> M;
-		minimizers_with_kr(s.string(), M,w, k);
+		unordered_set<uint64_t> M;
+		string temp_s = s.string();
+		compute_minimizers(temp_s, w, k, M);
 		for(auto it : M)
 				mini_pos.push_back(it + ii*N);
 		ii++;
@@ -208,41 +211,58 @@ int main (int argc, char ** argv )
 		patterns.push(boost::iostreams::gzip_decompressor());
 		patterns.push(file);	
 		begin = get_time::now();
+		auto search_time = 0;
+		auto verify_time = 0;
+		auto mini_time = 0;
 		for (string pattern; getline(patterns, pattern); ){
 			if(pattern.size() < k) continue;
 			set<int64_t> valid_res;
 			// output_file << pattern << ":"; 
-			size_t j = find_minimizer_index(pattern, k);
+			auto bf = get_time::now();
+			unordered_set<uint64_t> min_ind;
+			compute_minimizers(pattern, ell, k, min_ind);
+			size_t j = *min_ind.begin();
+			auto ef = get_time::now();
+			mini_time += chrono::duration_cast<chrono::microseconds>(ef-bf).count();
 			int l = j;
 			int r = pattern.size()-l;
 			if(j*2 > pattern.size()){
 				string left_pattern = pattern.substr(0, j+1);
 				reverse(left_pattern.begin(), left_pattern.end());
+				auto b1 = get_time::now();
 				pair<int64_t ,int64_t> left_interval = rev_pattern_matching ( left_pattern, fH, LSA, LLCP, lrmq, (int64_t)g );
-
+				auto e1 = get_time::now();
+				search_time += chrono::duration_cast<chrono::microseconds>(e1-b1).count();
+						auto bv1 = get_time::now();
 				if( left_interval.first <= left_interval.second ){					
 					for(int64_t i = left_interval.first; i <= left_interval.second; i++){
 						int begin = Nz - (LSA[i]+left_pattern.size());
 						if(begin < 0 || begin + pattern.size() >= Nz) continue;
 						if(valid_res.count(begin%N)) continue;	
+
+						 int c = Nz - LSA[i] - 1;						
+						 double lpi = fH.get_pi(c, begin, l);
+						 double rpi = fH.check_pi(pattern, l, begin+l, r, c);
 						
-						// int c = Nz - LSA[i] - 1;						
-						// double lpi = fH.get_pi(c, begin, l);
-						// double rpi = fH.check_pi(pattern, l, begin+l, r, c);
-						
-						// if( lpi * rpi * z >= 1 ){
-							// valid_res.insert( begin%N );
-						// }
-						
-						if(is_valid(text, alphabet, pattern, begin, z)){
-							valid_res.insert( begin%N );
-						}
+						 if( lpi * rpi * z >= 1 ){
+							 valid_res.insert( begin%N );
+						 }
+
+						//if(is_valid(text, alphabet, pattern, begin, z)){
+						//	valid_res.insert( begin%N );
+						//}
 					}
+											auto ev1 = get_time::now();
+											verify_time += chrono::duration_cast<chrono::microseconds>(ev1-bv1).count();
 				}
 	
 			}else{
 				string right_pattern = pattern.substr(j);
+							auto b2 = get_time::now();
 				pair<int64_t ,int64_t> right_interval = pattern_matching ( right_pattern, fH, RSA, RLCP, rrmq, (int64_t)g );
+							auto e2 = get_time::now();
+				search_time += chrono::duration_cast<chrono::microseconds>(e2-b2).count();
+						auto bv2 = get_time::now();
 				if( right_interval.first <= right_interval.second ){
 					for(int64_t i = right_interval.first; i <= right_interval.second; i++){
 						int begin = RSA[i] - l;						
@@ -260,6 +280,9 @@ int main (int argc, char ** argv )
 						}
 					}
 				}
+										auto ev2 = get_time::now();											
+										verify_time += chrono::duration_cast<chrono::microseconds>(ev2-bv2).count();
+
 			}
 			// for(auto occ : valid_res){
 				// output_file << occ << " ";
@@ -271,8 +294,12 @@ int main (int argc, char ** argv )
 		end = get_time::now();
 		auto diff3 = end - begin;
 		output_file << "PMT "<< chrono::duration_cast<chrono::milliseconds>(diff3).count()<<"\n" << "OCCS " << total_occ_no << endl;
+		output_file << "search time: " << double(search_time) * 0.001 << endl; 
+		output_file << "verify time: " << double(verify_time) * 0.001 << endl;		
+		output_file << "minimizer time: " << double(mini_time) * 0.001 << endl;
+
 	}
 
 	return 0;
 }
-
+	

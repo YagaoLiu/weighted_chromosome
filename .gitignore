@@ -3,3 +3,4 @@ chr22.in
 WST/efm.sh
 WST/sars.sh
 WSA/efm.sh
+*.o
