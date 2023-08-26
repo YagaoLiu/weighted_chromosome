@@ -6,7 +6,7 @@
 #include <cstring>
 #include <deque>
 #include "krfp.h"
-#include "anchors_new.h"
+#include "minimizers.h"
 
 using namespace std;
 typedef uint64_t INT;  
