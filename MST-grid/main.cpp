@@ -25,6 +25,8 @@
 #include "input.h"
 //#include "weighted_sequence.h"
 #include "minimizer_index.h"
+#include "krfp.h"
+
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
@@ -43,6 +45,8 @@ int main (int argc, char ** argv ) {
 	struct mallinfo2 mi;
     	mi = mallinfo2();
 	auto begin_ram = mi.hblkhd + mi.uordblks;
+	
+	karp_rabin_hashing::init();
 	MinimizerIndex M;
 	text >> M;
     	M.build_index(st.z, ell);

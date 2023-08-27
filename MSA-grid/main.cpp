@@ -29,7 +29,8 @@
 #include "input.h"
 #include "estimation.h"
 #include "property_string.h"
-#include "anchors_new.h"
+#include "krfp.h"
+#include "minimizers.h"
 #include "sa.h"
 #include "grid.h"
 #include "pattern_matching.h"
@@ -82,6 +83,7 @@ int main (int argc, char ** argv )
 
 	string alphabet;
 	vector<vector<double>> text;
+	karp_rabin_hashing::init();
 
 	int   N;
 	text_file >> N;
@@ -114,13 +116,11 @@ int main (int argc, char ** argv )
 	int   ii = 0;
 	for(PropertyString const & s : fS.strings()){
 		zstrs += s.string();
-		std::vector<int  > M;
-		minimizers_with_kr(s.string(), M,w, k);
-		for(auto it : M){
-			if(s._pi[it] >= k){
+		unordered_set<uint64_t> M;
+		string temp_s = s.string();
+		compute_minimizers(temp_s, w, k, M);
+		for(auto it : M)
 				mini_pos.push_back(it + ii*N);
-			}
-		}
 		ii++;
 	}
 	
@@ -251,7 +251,7 @@ int main (int argc, char ** argv )
 		for (string pattern; getline(patterns, pattern); ){
 			if(pattern.size() < k) continue;
 			// output_file << pattern << ":"; 
-			size_t j = find_minimizer_index(pattern, k);
+			size_t j = pattern_minimizers(pattern, k);
 			string left_pattern = pattern.substr(0, j+1);
 			
 

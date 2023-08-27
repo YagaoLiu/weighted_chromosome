@@ -8,20 +8,23 @@
 #include <unordered_map>
 #include <sys/resource.h>
 #include <algorithm>
-#include "estimation.h"
-#include "anchors_new.h"
-#include "minimizer_index.h"
 #include <unordered_map>
+
+#include "estimation.h"
+#include "krfp.h"
+#include "minimizers.h"
+#include "minimizer_index.h"
 
 using std::endl;
 using std::cerr;
 using get_time = std::chrono::steady_clock;
 
-bool sort_sa(const pair<int,int> &a,const pair<int,int> &b){
+bool sort_sa(const pair<int,int> &a,const pair<int,int> &b)
+{
        return a.first<b.first;
 }
 
-std::istream & operator >> (std::istream& input, MinimizerIndex &M){
+std::istream & operator >> (std::istream& input, MinimizerIndex &M) {
     input >> M.N;
     input >> M.alph;
     int A = M.alph.size();
@@ -142,8 +145,9 @@ void MinimizerIndex::build_index(double z, int ell){
 	
 	for(PropertyString const & s : fS.strings()){
 		fT += s;
-		std::vector<int> M;
-		minimizers_with_kr(s.string(), M, w, k);		
+		std::unordered_set<uint64_t> M;
+		string temp_s = s.string();
+		compute_minimizers(temp_s, w, k, M);
 		for(auto it : M){
 			f_mini_pos.emplace_back(it + i*N);
 		}
@@ -176,22 +180,11 @@ void MinimizerIndex::build_index(double z, int ell){
 	vector<vector<double>>().swap(fP);
 }
 
-int  find_minimizer_index(string s, int  k) {
-  int  minimizer_index = 0;
-  for (int  i = 1; i <= s.length() - k; i++) {
-    if (s.substr(i, k) < s.substr(minimizer_index, k)) {
-      minimizer_index = i;
-    }
-  }
-
-  return minimizer_index;
-}
-
 std::vector<int> MinimizerIndex::occurrences(std::string const &P, int ell, double z, std::ostream& result) const{
 	int m = P.size();
 	int k = ceil(4 * log2(ell) / log2(alph.size()));
-	std::string minimizer = P.substr(0,k);
-	int min_index = find_minimizer_index(P,k);
+	string pattern = P;
+	int min_index = pattern_minimizers(pattern,k);
 	bool flag = false;
 	
 	std::set<int> occs;

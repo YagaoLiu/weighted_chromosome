@@ -8,10 +8,12 @@
 #include <unordered_map>
 #include <sys/resource.h>
 #include <algorithm>
-#include "estimation.h"
-#include "anchors_new.h"
-#include "minimizer_index.h"
 #include <unordered_map>
+
+#include "estimation.h"
+#include "krfp.h"
+#include "minimizers.h"
+#include "minimizer_index.h"
 
 typedef grid_point point;
 typedef grid_query query;
@@ -147,13 +149,15 @@ void MinimizerIndex::build_index(double z, int ell){
 	
 	for(PropertyString const & s : fS.strings()){
 		fT += s;
-		std::vector<int> M;
-		minimizers_with_kr(s.string(), M, w, k);		
+		std::unordered_set<uint64_t> M;
+		string temp_s = s.string();
+		compute_minimizers(temp_s, w, k, M);
 		for(auto it : M){
 			f_mini_pos.emplace_back(it + i*N);
 		}
 		i++;
 	}	
+	
 	string zstrs = fT.string();
 	string rev_zstrs(zstrs.rbegin(), zstrs.rend());
 	vector<int> le;
@@ -211,69 +215,13 @@ void MinimizerIndex::build_index(double z, int ell){
 	fS.clear();
 	fT.clear();	
 	vector<vector<double>>().swap(fP);
-	
-		int oc = zstrs.find("AGCTAGCTTCAAATAGTATTCTGCAGCCAGGC");
-	cout << oc << " " << oc%N <<endl;
-	cout << fH.substr(oc, 32) << endl;
 }
-
-int  find_minimizer_index(string s, int  k) {
-  int  minimizer_index = 0;
-  for (int  i = 1; i <= s.length() - k; i++) {
-    if (s.substr(i, k) < s.substr(minimizer_index, k)) {
-      minimizer_index = i;
-    }
-  }
-
-  return minimizer_index;
-}
-
-std::vector<int> MinimizerIndex::occurrences(std::string const &P, int ell, double z, std::ostream& result) const{
-	int m = P.size();
-	int k = ceil(4 * log2(ell) / log2(alph.size()));
-	std::string minimizer = P.substr(0,k);
-	int min_index = 0;
-	for(size_t i = 1; i < m-k; i++){
-		std::string kmer = P.substr(i,k);
-		if(kmer < minimizer){
-			minimizer = kmer;
-			min_index = i;
-		}
-	}
-	std::vector<int> final_occs;
-	std::set<int> occs;
-	if(min_index <= ceil(m/2) ){
-		std::string min_suf = P.substr(min_index);
-		for(int o : forward_index->occurrences(min_suf)){
-			if( (o%N) >= min_index ){
-				occs.insert( (o%N) - min_index );
-			}
-		}
-	}else{
-		std::string rP = P;
-		std::reverse(rP.begin(), rP.end());
-		int r_index = m - min_index - 1;
-		std::string min_suf = rP.substr(r_index);
-		for(int o : reverse_index->occurrences(min_suf)){
-			if( (o%N) >= r_index ){
-				occs.insert( (o%N) - r_index );
-			}
-		}
-	}
-	for(int i : occs){
-		if(is_valid(P, i, z)){
-			final_occs.emplace_back(i);
-		}
-	}
-	return final_occs;
-}
-
 
 std::vector<int> MinimizerIndex::GridMatch(std::string const& pattern, int ell, double z) const{
 	int m = pattern.size();
 	int k = ceil(4 * log2(ell) / log2(alph.size()));
-	std::string minimizer = pattern.substr(0,k);
-	int min_index = find_minimizer_index(pattern,k);
+	std::string P = pattern;
+	int min_index = pattern_minimizers(P,k);
 	std::set<int> occs;
 	std::string left_pattern = pattern.substr(0, min_index+1);
 	reverse(left_pattern.begin(), left_pattern.end());
@@ -305,18 +253,4 @@ std::vector<int> MinimizerIndex::GridMatch(std::string const& pattern, int ell, 
 	}
 	std::vector<int> final_occs(occs.begin(), occs.end());
 	return final_occs;
-}
-
-bool  MinimizerIndex::is_valid(string const& p, int pos, double z) const{
-		unordered_map<char, int> mapping;
-		pos = pos%N;
-		if(pos + p.size() > N) return false;
-		for(int i = 0; i < alph.size(); i++){
-			mapping[alph[i]] = i;
-		}
-		double cum_prob = 1;
-		for(int i = 0; i < p.size(); i++){
-			cum_prob *= fP[pos+i][mapping[p[i]]];
-		}
-		return (cum_prob*z >= 1)?true:false;
 }
