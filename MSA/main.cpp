@@ -68,14 +68,14 @@ bool is_valid(vector<vector<double>>& text, string& alph, string& p, int64_t   p
 
 int main (int argc, char ** argv )
 {
-    Settings st = decode_switches(argc, argv);
+    	Settings st = decode_switches(argc, argv);
 	istream& text_file = st.text.is_open()?st.text:cin;
 	ostream& output_file = st.output.is_open()?st.output:cout;
 	ofstream result;
 	
 	auto begin = get_time::now();
 	struct mallinfo2 mi;
-    mi = mallinfo2();
+    	mi = mallinfo2();
 	double begin_ram = mi.hblkhd + mi.uordblks;
 	
 	double z = st.z;
@@ -136,7 +136,7 @@ int main (int argc, char ** argv )
 	HeavyString fH(text, zstrs, alphabet, f_mini_pos, le, re, true);
 	
 	fS.clear();
-	// vector<vector<double>>().swap(text);
+	vector<vector<double>>().swap(text);
 
 
 	int   * fSA		= new int   [Nz];
@@ -159,6 +159,7 @@ int main (int argc, char ** argv )
 		iSA[rSA[i]] = i;
 	}
 	LCParray( seq, Nz, rSA, iSA, rLCP );
+	delete[] iSA;
 	
 	int   * RSA	 = new int   [g];
 	int   * RLCP = new int   [g];
@@ -176,7 +177,6 @@ int main (int argc, char ** argv )
 	delete[] fLCP;
 	delete[] rSA;
 	delete[] rLCP;
-	delete[] iSA;
 	
 	vector<int> tmp_llcp(LLCP, LLCP+g);
 	vector<int> tmp_rlcp(RLCP, RLCP+g);	
@@ -216,8 +216,8 @@ int main (int argc, char ** argv )
 		auto mini_time = 0;
 		for (string pattern; getline(patterns, pattern); ){
 			if(pattern.size() < k) continue;
-			set<int64_t> valid_res;
 			// output_file << pattern << ":"; 
+			set<int64_t> valid_res;
 			auto bf = get_time::now();
 
 			size_t j = pattern_minimizers(pattern, k);
