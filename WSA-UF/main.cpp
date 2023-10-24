@@ -177,11 +177,12 @@ int main (int argc, char ** argv )
 	vector<int> le;
 	vector<int> re;
 	extention(text, zstrs, alphabet, le, re, z);
+	vector<int>().swap(le);
 	fT._pi = re;
-		
+	
 	begin = get_time::now();
 	// maximalSF(text, zstrs, Nz, N, z, ME);
-	SA_LCP_index ( text, fT.string().c_str(), Nz, N, z, SA, LCP );
+	SA_LCP_index ( text, zstrs.c_str(), Nz, N, z, SA, LCP );
 	union_find_resort ( SA, LCP, re.data(), Nz );
 	
 	vector<int> tmp_lcp ( LCP, LCP+Nz);
