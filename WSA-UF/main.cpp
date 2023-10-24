@@ -128,17 +128,17 @@ void extention ( vector<vector<double>>& text, string& s, string& alph, vector<i
 
 int main (int argc, char ** argv )
 {
-    Settings st = decode_switches(argc, argv);
+    	Settings st = decode_switches(argc, argv);
 	istream& text_file = st.text.is_open()?st.text:cin;
 	ostream& output_file = st.output.is_open()?st.output:cout;
-    string& pfile_prefix = st.patterns;
+    	string& pfile_prefix = st.patterns;
 	ofstream result;
 	
 	double z = st.z;
 	
 	auto begin = get_time::now();
 	struct mallinfo2 mi;
-    mi = mallinfo2();
+    	mi = mallinfo2();
 	double begin_ram = mi.hblkhd + mi.uordblks;
 	string alphabet;
 	vector<vector<double>> text;
@@ -155,7 +155,7 @@ int main (int argc, char ** argv )
             sum += symbol[j];
         }
         text.emplace_back(symbol);
-    }
+    	}
 	mi = mallinfo2();
 	double rmq_space = mi.hblkhd + mi.uordblks;
 
@@ -173,7 +173,6 @@ int main (int argc, char ** argv )
 
 	int * SA	= new int [Nz];
 	int * LCP	= new int [Nz];
-	int * ME 	= new int [Nz];
 	vector<int> le;
 	vector<int> re;
 	extention(text, zstrs, alphabet, le, re, z);
