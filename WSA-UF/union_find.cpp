@@ -77,18 +77,13 @@ class UF    {
 	}
 };
 
-void union_find_resort( int * SA, int * LCP, int * property, int n )
+void union_find_resort( int * SA, int * LCP, int * ME, int n )
 {
 	UF uf(n);
-	int* ME = new int [n];
-	for(int i = 0; i < n; i++){
-		ME[i] = property[i] + 1;
-	}
-	vector< deque <int> > pSA (n);
-	vector< int > pLCP (n, 0);
+	vector< vector <int> > pSA (n);
 	vector< int > iSA (n, 0 );
-	map<int, vector<int> > lcp_map;
-	map<int, vector<int> > me_map;
+	unordered_map<int, vector<int> > lcp_map;
+	unordered_map<int, vector<int> > me_map;
 	int max_lcp = 0;
 	int max_me = 0;
 	for ( int i = 0; i < n; i++ )
@@ -97,9 +92,9 @@ void union_find_resort( int * SA, int * LCP, int * property, int n )
 		lcp_map[LCP[i]].push_back(i);
 		if ( max_lcp < LCP[i] )
 			max_lcp = LCP[i];
-		me_map[ME[SA[i]]].push_back(i);
-		if ( max_me < ME[SA[i]] )
-			max_me = ME[SA[i]];
+		me_map[ME[SA[i]]+1].push_back(i);
+		if ( max_me < ME[SA[i]] + 1 )
+			max_me = ME[SA[i]] + 1;
 	}
 
 	for ( int l = max( max_lcp, max_me ); l >= 0; l-- )
@@ -119,14 +114,19 @@ void union_find_resort( int * SA, int * LCP, int * property, int n )
 			for ( auto it = me_map[l].begin(); it != me_map[l].end(); it++ )
 			{
 				int f = uf.find( *it );
-				pSA[f].push_front ( SA[*it] );
+				pSA[f].push_back ( SA[*it] );
 			}
 		}
 	}
+	me_map.clear();
+	lcp_map.clear();
+
+	for ( int i = 0; i < n; i++ )	reverse(pSA[i].begin(), pSA[i].end());
 
 	int counter = 0;
 	int j = 0;
-	
+	vector< int > pLCP (n, 0);
+
 	for ( int i = 0; i < n; i++ )
 	{
 		if ( counter > 0 && i > 0 && !pSA[i].empty() )
@@ -135,26 +135,23 @@ void union_find_resort( int * SA, int * LCP, int * property, int n )
 			int k2 = pSA[i][0];
 			if ( iSA[k1] > iSA[k2] )
 			{
-				pLCP[counter] = ME[k1];
+				pLCP[counter] = ME[k1] + 1;
 			}
 			else
 			{
 				int rmq = LCP[++j];
 				for ( ; j <= i; j++ )
 					rmq = min ( rmq, LCP[j] );
-				pLCP[counter] = min ( rmq, min( ME[k1], ME[k2] ) );
+				pLCP[counter] = min ( rmq, min( ME[k1] + 1, ME[k2] + 1 ) );
 			}
-		}					
+		}
 		for ( auto it = pSA[i].begin(); it != pSA[i].end(); it++ )
 		{
 			if ( it != pSA[i].begin() )
-				pLCP[counter] = ME[*(it-1)];
+				pLCP[counter] = ME[*(it-1)] + 1;
 			SA[counter++] = *it;
 		}
 		if ( !pSA[i].empty() )	j = i;
 	}
-	for ( int i = 0; i < n; i++ )
-	{
-		LCP[i] = pLCP[i];
-	}
+	for ( int i = 0; i < n; i++ )	LCP[i] = pLCP[i];
 }
