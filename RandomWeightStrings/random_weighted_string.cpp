@@ -9,7 +9,7 @@ using namespace std;
 
 int main(){
 	string english = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	int length = 1000;
+	int length = 10000;
 	
 	int alphabet_size = 20;
 	string alphabet = english.substr(0, alphabet_size);
